@@ -1,0 +1,176 @@
+@font-face {
+  font-family: 'Qatar2022';
+  src: url('../qatar2022.ttf') format('truetype');
+}
+* {
+      box-sizing: border-box;
+      font-family: 'Qatar2022', sans-serif;
+  }
+
+
+body {
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at center, #8A1538, #5a0f26);
+  color: white;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* === NAVBAR NORMAL === */
+nav {
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 10px 20px;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+nav .links {
+  display: flex;
+  gap: 20px;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+/* === MENÚ HAMBURGUESA === */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
+}
+
+.menu-toggle span {
+  width: 25px;
+  height: 3px;
+  background: white;
+  border-radius: 2px;
+}
+
+/* === TOGGLE BOTONES === */
+.toggle-container {
+  margin: 100px auto 20px;
+}
+.logo-header {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+
+.toggle-container button {
+  padding: 10px 30px;
+  margin: 0 10px;
+  border: none;
+  font-size: 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-activo {
+  background: #FFD700;
+  color: #5a0f26;
+}
+
+.btn-inactivo {
+  background: white;
+  color: #8A1538;
+}
+
+/* === TABLA === */
+table {
+  width: 90%;
+  max-width: 1000px;
+  margin: 30px auto 80px;
+  background: white;
+  color: #8A1538;
+  border-collapse: collapse;
+  font-size: 20px;
+}
+
+th, td {
+  padding: 14px;
+  border: 2px solid #C72C48;
+}
+
+thead {
+  background: #8A1538;
+  color: white;
+}
+
+/* === RESPONSIVE === */
+@media screen and (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 20px;
+  }
+
+  .menu-toggle {
+    display: flex;
+  }
+
+  nav .links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    margin-top: 10px;
+    padding: 10px 0;
+  }
+
+  nav .links.active {
+    display: flex;
+  }
+
+  nav a {
+    margin: 10px 20px;
+    font-size: 16px;
+  }
+  h1 {
+    font-size: 28px;
+  }
+
+  table {
+    font-size: 14px;
+  }
+
+  th, td {
+    padding: 10px;
+  }
+
+  .toggle-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+@media screen and (min-width: 769px) {
+  nav {
+    justify-content: center;
+  }
+
+  .menu-toggle {
+    display: none;
+  }
+
+  nav .links {
+    display: flex !important;
+    flex-direction: row;
+    align-items: center;
+  }
+}
+

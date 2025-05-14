@@ -3,98 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <title>Tabla de Posiciones - Empro Champions</title>
-  <style>
-    @font-face {
-      font-family: 'Qatar2022';
-      src: url('qatar2022.ttf') format('truetype');
-    }
-
-    * {
-      font-family: 'Qatar2022', sans-serif;
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      background: radial-gradient(circle at center, #8A1538, #5a0f26);
-      color: white;
-      text-align: center;
-    }
-
-    nav {
-      background-color: rgba(0, 0, 0, 0.4);
-      padding: 10px;
-      position: fixed;
-      top: 0;
-      width: 100%;
-      z-index: 10;
-    }
-
-    nav a {
-      color: white;
-      margin: 0 20px;
-      text-decoration: none;
-      font-size: 18px;
-    }
-
-    h1 {
-      margin-top: 80px;
-      font-size: 36px;
-    }
-
-    .toggle-container {
-      margin: 20px auto;
-    }
-
-    .toggle-container button {
-      padding: 10px 30px;
-      margin: 0 10px;
-      border: none;
-      font-size: 18px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .btn-activo {
-      background: #FFD700;
-      color: #5a0f26;
-    }
-
-    .btn-inactivo {
-      background: white;
-      color: #8A1538;
-    }
-
-    table {
-      width: 90%;
-      max-width: 1000px;
-      margin: 30px auto 80px;
-      background: white;
-      color: #8A1538;
-      border-collapse: collapse;
-      font-size: 20px;
-    }
-
-    th, td {
-      padding: 14px;
-      border: 2px solid #C72C48;
-    }
-
-    thead {
-      background: #8A1538;
-      color: white;
-    }
-  </style>
+  <link rel="stylesheet" href="styles/index.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
 <nav>
-  <a href="match.html">🎮 Nuevo Partido</a>
-  <a href="index.html">📊 Tabla</a>
-  <a href="goleadores.html">🥇 Máximo Goleador</a>
-  <a href="historial.html">📋 Historial de Partidos</a>
+  <div class="menu-toggle" onclick="toggleMenu()">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+  <div class="links" id="navLinks">
+    <a href="index.html">🏆 Tabla</a>
+    <a href="match.html">🎮 Nuevo Partido</a>
+    <a href="goleadores.html">🥇 Goleadores</a>
+    <a href="historial.html">📋 Historial</a>
+  </div>
 </nav>
 
 <div style="margin-top: 100px;">
@@ -186,6 +111,33 @@
     }
   }
 </script>
+<script>
+  function toggleMenu() {
+    document.getElementById('navLinks').classList.toggle('active');
+  }
+</script>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyD9cpSfGG212h80iXofJetw-B-arEEcOvI",
+    authDomain: "emprochampions2025.firebaseapp.com",
+    projectId: "emprochampions2025",
+    storageBucket: "emprochampions2025.firebasestorage.app",
+    messagingSenderId: "683206087538",
+    appId: "1:683206087538:web:8a1473aec968bd6ab543eb",
+    measurementId: "G-3TX5J3NDT5"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
 </body>
 </html>
