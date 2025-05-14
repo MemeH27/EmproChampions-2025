@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Seleccionar Equipos - Empro Champions</title>
+  <style>
+    @font-face {
+      font-family: 'Qatar2022';
+      src: url('qatar2022.ttf') format('truetype');
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Qatar2022', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at center, #8A1538, #5a0f26);
+      color: white;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 30px;
+      font-size: 48px;
+    }
+
+    .gender-toggle {
+      margin-top: 10px;
+    }
+
+    .gender-toggle button {
+      font-size: 20px;
+      margin: 0 10px;
+      padding: 10px 25px;
+      border: none;
+      border-radius: 10px;
+      background-color: white;
+      color: #8A1538;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(0,0,0,0.3);
+    }
+
+    .gender-toggle button.active {
+      background-color: #FFD700;
+      color: #5a0f26;
+      font-weight: bold;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 50px auto;
+      gap: 80px;
+      flex-wrap: wrap;
+    }
+
+    .team-card {
+      background: white;
+      color: #8A1538;
+      padding: 30px;
+      border-radius: 20px;
+      width: 300px;
+      text-align: center;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .team-card img {
+      width: 150px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+
+    .team-name {
+      font-size: 24px;
+      margin: 10px 0;
+    }
+
+    .arrow {
+      font-size: 40px;
+      cursor: pointer;
+      user-select: none;
+      margin: 0 20px;
+      color: #FFD700;
+      transition: transform 0.2s ease;
+    }
+
+    .arrow:hover {
+      transform: scale(1.2);
+    }
+
+    .start-btn {
+      font-size: 26px;
+      background: #FFD700;
+      color: #8A1538;
+      border: none;
+      padding: 18px 60px;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-top: 40px;
+      box-shadow: 0 0 15px rgba(255,215,0,0.4);
+      transition: transform 0.2s ease;
+    }
+
+    .start-btn:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+<h1>Selecciona los Equipos</h1>
+
+<div class="gender-toggle">
+  <button id="btnMasculino" class="active" onclick="setGenero('masculino')">Masculino</button>
+  <button id="btnFemenino" onclick="setGenero('femenino')">Femenino</button>
+</div>
+
+<div class="container">
+  <div class="team-card" id="card1">
+    <div class="arrow" onclick="prevTeam(1)">⬅</div>
+    <img id="logo1" src="">
+    <div class="team-name" id="name1"></div>
+    <div class="arrow" onclick="nextTeam(1)">➡</div>
+  </div>
+
+  <div class="team-card" id="card2">
+    <div class="arrow" onclick="prevTeam(2)">⬅</div>
+    <img id="logo2" src="">
+    <div class="team-name" id="name2"></div>
+    <div class="arrow" onclick="nextTeam(2)">➡</div>
+  </div>
+</div>
+
+<button class="start-btn" onclick="iniciarPartido()">INICIAR PARTIDO</button>
+
+<script>
+  const equiposBase = [
+    { name: "Don Bosco", logo: "LOGOS COMUS/LOGO SAN JUAN BOSCO.png" },
+    { name: "Luz en mi Camino", logo: "LOGOS COMUS/LUZ EN MI CAMINO.png" },
+    { name: "Huellas de Jesús", logo: "LOGOS COMUS/LOGO HUELLAS DE JESUS.png" },
+    { name: "Mensajeros de Paz", logo: "LOGOS COMUS/LOGO MENSAJEROS DE PAZ.png" },
+    { name: "Atrapados en su Red", logo: "LOGOS COMUS/LOGO ATRAPADOS.png" }
+  ];
+
+  const equipoExtraMasculino = { name: "Emprosaurios", logo: "LOGOS COMUS/LOGO EMPROSAURIOS.png" };
+
+  let genero = "masculino";
+  let equipos = [];
+  let index1 = 0;
+  let index2 = 1;
+
+  function setGenero(gen) {
+    genero = gen;
+
+    document.getElementById('btnMasculino').classList.remove('active');
+    document.getElementById('btnFemenino').classList.remove('active');
+    document.getElementById(`btn${gen.charAt(0).toUpperCase() + gen.slice(1)}`).classList.add('active');
+
+    // Clonar base y agregar Emprosaurios solo a masculino
+    equipos = [...equiposBase];
+    if (genero === "masculino") {
+      equipos.push(equipoExtraMasculino);
+    }
+
+    // Reiniciar índices y actualizar tarjetas
+    index1 = 0;
+    index2 = 1;
+    updateCards();
+  }
+
+  function updateCards() {
+    document.getElementById("logo1").src = equipos[index1].logo;
+    document.getElementById("name1").textContent = equipos[index1].name;
+
+    document.getElementById("logo2").src = equipos[index2].logo;
+    document.getElementById("name2").textContent = equipos[index2].name;
+
+    const card1 = document.getElementById("card1");
+    const card2 = document.getElementById("card2");
+    card1.style.animation = "fadeIn 0.3s ease";
+    card2.style.animation = "fadeIn 0.3s ease";
+    setTimeout(() => {
+      card1.style.animation = "";
+      card2.style.animation = "";
+    }, 300);
+  }
+
+  function nextTeam(card) {
+    if (card === 1) {
+      index1 = (index1 + 1) % equipos.length;
+      if (index1 === index2) index1 = (index1 + 1) % equipos.length;
+    } else {
+      index2 = (index2 + 1) % equipos.length;
+      if (index2 === index1) index2 = (index2 + 1) % equipos.length;
+    }
+    updateCards();
+  }
+
+  function prevTeam(card) {
+    if (card === 1) {
+      index1 = (index1 - 1 + equipos.length) % equipos.length;
+      if (index1 === index2) index1 = (index1 - 1 + equipos.length) % equipos.length;
+    } else {
+      index2 = (index2 - 1 + equipos.length) % equipos.length;
+      if (index2 === index1) index2 = (index2 - 1 + equipos.length) % equipos.length;
+    }
+    updateCards();
+  }
+
+  function iniciarPartido() {
+    localStorage.setItem("genero", genero);
+    localStorage.setItem("equipo1", JSON.stringify(equipos[index1]));
+    localStorage.setItem("equipo2", JSON.stringify(equipos[index2]));
+    window.location.href = "control.html";
+  }
+
+  // Cargar masculino por defecto
+  setGenero("masculino");
+</script>
+
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Tabla de Posiciones - Empro Champions</title>
+  <style>
+    @font-face {
+      font-family: 'Qatar2022';
+      src: url('qatar2022.ttf') format('truetype');
+    }
+
+    * {
+      font-family: 'Qatar2022', sans-serif;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at center, #8A1538, #5a0f26);
+      color: white;
+      text-align: center;
+    }
+
+    nav {
+      background-color: rgba(0, 0, 0, 0.4);
+      padding: 10px;
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 10;
+    }
+
+    nav a {
+      color: white;
+      margin: 0 20px;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    h1 {
+      margin-top: 80px;
+      font-size: 36px;
+    }
+
+    .toggle-container {
+      margin: 20px auto;
+    }
+
+    .toggle-container button {
+      padding: 10px 30px;
+      margin: 0 10px;
+      border: none;
+      font-size: 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btn-activo {
+      background: #FFD700;
+      color: #5a0f26;
+    }
+
+    .btn-inactivo {
+      background: white;
+      color: #8A1538;
+    }
+
+    table {
+      width: 90%;
+      max-width: 1000px;
+      margin: 30px auto 80px;
+      background: white;
+      color: #8A1538;
+      border-collapse: collapse;
+      font-size: 20px;
+    }
+
+    th, td {
+      padding: 14px;
+      border: 2px solid #C72C48;
+    }
+
+    thead {
+      background: #8A1538;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="match.html">🎮 Nuevo Partido</a>
+  <a href="index.html">📊 Tabla</a>
+  <a href="goleadores.html">🥇 Máximo Goleador</a>
+  <a href="historial.html">📋 Historial de Partidos</a>
+</nav>
+
+<div style="margin-top: 100px;">
+  <img src="logo2.png" alt="Logo Tabla" style="max-width: 90%; height: auto;" />
+</div>
+
+<div class="toggle-container">
+  <button id="btnMasculino" onclick="mostrarTabla('masculino')" class="btn-activo">Masculino</button>
+  <button id="btnFemenino" onclick="mostrarTabla('femenino')" class="btn-inactivo">Femenino</button>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Pos</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th>
+      <th>GF</th><th>GC</th><th>DG</th><th>Pts</th>
+    </tr>
+  </thead>
+  <tbody id="tablaCuerpo"></tbody>
+</table>
+<script>
+  let generoActual = "masculino";
+
+  function mostrarTabla(genero) {
+    generoActual = genero;
+
+    const btnM = document.getElementById("btnMasculino");
+    const btnF = document.getElementById("btnFemenino");
+
+    if (genero === "masculino") {
+      btnM.classList.add("btn-activo");
+      btnM.classList.remove("btn-inactivo");
+      btnF.classList.remove("btn-activo");
+      btnF.classList.add("btn-inactivo");
+    } else {
+      btnF.classList.add("btn-activo");
+      btnF.classList.remove("btn-inactivo");
+      btnM.classList.remove("btn-activo");
+      btnM.classList.add("btn-inactivo");
+    }
+
+    const data = JSON.parse(localStorage.getItem(
+      genero === "femenino" ? "posicionesFemenino" : "posicionesMasculino"
+    )) || {};
+
+    const tabla = Object.entries(data).map(([equipo, s]) => ({
+      equipo, ...s, DG: s.GF - s.GC
+    })).sort((a, b) => b.Pts - a.Pts || b.DG - a.DG || b.GF - a.GF);
+
+    const cuerpo = document.getElementById("tablaCuerpo");
+    cuerpo.innerHTML = "";
+
+    tabla.forEach((row, i) => {
+      cuerpo.innerHTML += `
+        <tr>
+          <td>${i + 1}</td><td>${row.equipo}</td><td>${row.PJ}</td>
+          <td>${row.G}</td><td>${row.E}</td><td>${row.P}</td>
+          <td>${row.GF}</td><td>${row.GC}</td><td>${row.DG}</td><td>${row.Pts}</td>
+        </tr>
+      `;
+    });
+  }
+
+  // Mostrar masculino al iniciar
+  mostrarTabla("masculino");
+</script>
+<div style="margin-bottom: 60px;">
+  <button onclick="reiniciarTorneo()" style="
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+    padding: 10px 30px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: 'Qatar2022', sans-serif;
+    cursor: pointer;
+    margin-top: 40px;
+  ">
+    🗑️ Reiniciar Torneo
+  </button>
+</div>
+
+<script>
+  function reiniciarTorneo() {
+    if (confirm("¿Estás seguro de que deseas reiniciar todo el torneo? Esto eliminará todas las tablas, historial y goleadores.")) {
+      localStorage.clear();
+      alert("Torneo reiniciado correctamente.");
+      location.reload();
+    }
+  }
+</script>
+
+</body>
+</html>

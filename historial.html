@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Historial de Partidos</title>
+  <style>
+    @font-face {
+      font-family: 'Qatar2022';
+      src: url('qatar2022.ttf') format('truetype');
+    }
+
+    * {
+      font-family: 'Qatar2022', sans-serif;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at center, #8A1538, #5a0f26);
+      color: white;
+    }
+
+    nav {
+      background-color: rgba(0, 0, 0, 0.4);
+      padding: 10px;
+      text-align: center;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 10;
+    }
+
+    nav a {
+      color: white;
+      margin: 0 20px;
+      text-decoration: none;
+      font-size: 18px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 80px;
+      font-size: 36px;
+    }
+
+    .historial-container {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      padding: 40px 20px;
+      max-width: 1300px;
+      margin: auto;
+      flex-wrap: wrap;
+    }
+
+    .columna {
+      flex: 1;
+      min-width: 400px;
+    }
+
+    .columna h2 {
+      text-align: center;
+      font-size: 24px;
+      color: #FFD700;
+      margin-bottom: 20px;
+    }
+
+    .partido {
+      background: #fff;
+      color: #8A1538;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(255,255,255,0.1);
+    }
+
+    .resumen {
+      padding: 20px;
+      font-size: 18px;
+      border-bottom: 1px solid #c72c48;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .marcador {
+      font-size: 28px;
+      font-weight: bold;
+      color: #5a0f26;
+      background: #ffd700;
+      padding: 6px 16px;
+      border-radius: 10px;
+    }
+
+    .detalles {
+      display: none;
+      padding: 20px;
+      font-size: 16px;
+      background: #fcecec;
+    }
+
+    .btn-toggle {
+      background: #8A1538;
+      color: white;
+      font-size: 14px;
+      padding: 6px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">📊 Tabla</a>
+  <a href="match.html">🎮 Nuevo Partido</a>
+  <a href="goleadores.html">🥇 Máximo Goleador</a>
+  <a href="historial.html">📋 Historial de Partidos</a>
+</nav>
+
+<div style="margin-top: 100px; text-align: center;">
+  <img src="logo4.png" alt="Historial de Partidos" style="max-width: 90%; height: auto;" />
+</div>
+
+
+<div class="historial-container">
+  <div class="columna" id="columnaMasculino">
+    <h2>Masculino</h2>
+  </div>
+  <div class="columna" id="columnaFemenino">
+    <h2>Femenino</h2>
+  </div>
+</div>
+
+<script>
+  const historial = JSON.parse(localStorage.getItem("historialPartidos")) || [];
+
+  const masculino = document.getElementById("columnaMasculino");
+  const femenino = document.getElementById("columnaFemenino");
+
+  historial.forEach((p, i) => {
+    const id = `detalle-${i}`;
+    const tiempoTexto = `${String(Math.floor(p.tiempo / 60)).padStart(2, '0')}:${String(p.tiempo % 60).padStart(2, '0')}`;
+
+    const partidoHTML = `
+      <div class="partido">
+        <div class="resumen">
+          <div>
+            🗓️ ${p.fecha}<br>
+            🆚 ${p.equipo1} vs ${p.equipo2}
+          </div>
+          <div class="marcador">${p.marcador}</div>
+          <button class="btn-toggle" onclick="toggleDetalles('${id}')">Ver más</button>
+        </div>
+        <div class="detalles" id="${id}">
+          ⚥ Género: ${p.genero}<br>
+          ⏱️ Tiempo jugado: ${tiempoTexto}
+        </div>
+      </div>
+    `;
+
+    if (p.genero === "femenino") {
+      femenino.innerHTML += partidoHTML;
+    } else {
+      masculino.innerHTML += partidoHTML;
+    }
+  });
+
+  function toggleDetalles(id) {
+    const div = document.getElementById(id);
+    div.style.display = div.style.display === 'block' ? 'none' : 'block';
+  }
+</script>
+
+</body>
+</html>
