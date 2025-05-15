@@ -2,13 +2,14 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Tabla de Posiciones - Empro Champions</title>
+  <title>Tabla de Posiciones</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles/index.css" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
 <body>
 
 <nav>
+  <img src="logo.png" alt="Logo" />
   <div class="menu-toggle" onclick="toggleMenu()">
     <span></span>
     <span></span>
@@ -22,9 +23,7 @@
   </div>
 </nav>
 
-<div style="margin-top: 100px;">
-  <img src="logo2.png" alt="Logo Tabla" style="max-width: 90%; height: auto;" />
-</div>
+<h1>Tabla de Posiciones</h1>
 
 <div class="toggle-container">
   <button id="btnMasculino" onclick="mostrarTabla('masculino')" class="btn-activo">Masculino</button>
@@ -34,8 +33,8 @@
 <table>
   <thead>
     <tr>
-      <th>Pos</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th>
-      <th>GF</th><th>GC</th><th>DG</th><th>Pts</th>
+      <th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th>
+      <th>GF</th><th>GC</th><th>DG</th><th>Pts</th><th>Últimos 5</th>
     </tr>
   </thead>
   <tbody id="tablaCuerpo"></tbody>
@@ -57,15 +56,8 @@
   </button>
 </div>
 
-<script>
-  function toggleMenu() {
-    document.getElementById('navLinks').classList.toggle('active');
-  }
-</script>
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-analytics.js";
   import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
 
   const firebaseConfig = {
@@ -79,56 +71,88 @@
   };
 
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const db = getDatabase();
-
+  const db = getDatabase(app);
   let generoActual = "masculino";
 
-  window.mostrarTabla = function (genero) {
+  window.mostrarTabla = (genero) => {
     generoActual = genero;
 
-    const btnM = document.getElementById("btnMasculino");
-    const btnF = document.getElementById("btnFemenino");
-
-    btnM.classList.toggle("btn-activo", genero === "masculino");
-    btnM.classList.toggle("btn-inactivo", genero !== "masculino");
-    btnF.classList.toggle("btn-activo", genero === "femenino");
-    btnF.classList.toggle("btn-inactivo", genero !== "femenino");
+    document.getElementById("btnMasculino").classList.toggle("btn-activo", genero === "masculino");
+    document.getElementById("btnMasculino").classList.toggle("btn-inactivo", genero !== "masculino");
+    document.getElementById("btnFemenino").classList.toggle("btn-activo", genero === "femenino");
+    document.getElementById("btnFemenino").classList.toggle("btn-inactivo", genero !== "femenino");
 
     const ruta = genero === "femenino" ? "posicionesFemenino" : "posicionesMasculino";
     const tablaRef = ref(db, ruta);
 
     onValue(tablaRef, (snapshot) => {
-      const data = snapshot.val() || {};
-      const tabla = Object.entries(data).map(([equipo, s]) => ({
-        equipo, ...s, DG: s.GF - s.GC
-      })).sort((a, b) => b.Pts - a.Pts || b.DG - a.DG || b.GF - a.GF);
+      const posiciones = snapshot.val() || {};
+      const historialRef = ref(db, "historialPartidos");
 
-      const cuerpo = document.getElementById("tablaCuerpo");
-      cuerpo.innerHTML = "";
+      onValue(historialRef, (snap) => {
+        const historial = snap.val() || {};
+        const ultimos = {};
 
-      tabla.forEach((row, i) => {
-        cuerpo.innerHTML += `
-          <tr>
-            <td>${i + 1}</td><td>${row.equipo}</td><td>${row.PJ}</td>
-            <td>${row.G}</td><td>${row.E}</td><td>${row.P}</td>
-            <td>${row.GF}</td><td>${row.GC}</td><td>${row.DG}</td><td>${row.Pts}</td>
-          </tr>
-        `;
+        // Prepara resultados por equipo
+        Object.values(historial).forEach(p => {
+          if (p.genero !== genero) return;
+          const r1 = p.marcador.split(" - ").map(Number);
+          const g1 = r1[0], g2 = r1[1];
+          const e1 = p.equipo1, e2 = p.equipo2;
+
+          if (!ultimos[e1]) ultimos[e1] = [];
+          if (!ultimos[e2]) ultimos[e2] = [];
+
+          ultimos[e1].unshift(g1 > g2 ? "✅" : g1 < g2 ? "❌" : "➖");
+          ultimos[e2].unshift(g2 > g1 ? "✅" : g2 < g1 ? "❌" : "➖");
+
+          ultimos[e1] = ultimos[e1].slice(0, 5);
+          ultimos[e2] = ultimos[e2].slice(0, 5);
+        });
+
+        const tabla = Object.entries(posiciones).map(([equipo, s]) => ({
+          equipo,
+          logo: s.logo || `LOGOS COMUS/LOGO ${equipo.toUpperCase()}.png`,
+          ...s,
+          DG: s.GF - s.GC,
+          ult: ultimos[equipo] || []
+        })).sort((a, b) => b.Pts - a.Pts || b.DG - a.DG || b.GF - a.GF);
+
+        const cuerpo = document.getElementById("tablaCuerpo");
+        cuerpo.innerHTML = "";
+
+        tabla.forEach((row, i) => {
+          cuerpo.innerHTML += `
+            <tr>
+              <td>${i + 1}</td>
+              <td style="display:flex;align-items:center;gap:10px">
+                <img src="${row.logo}" alt="${row.equipo}" style="height:30px;width:auto;">
+                ${row.equipo}
+              </td>
+              <td>${row.PJ}</td><td>${row.G}</td><td>${row.E}</td><td>${row.P}</td>
+              <td>${row.GF}</td><td>${row.GC}</td><td>${row.DG}</td><td>${row.Pts}</td>
+              <td>${row.ult.join(" ")}</td>
+            </tr>
+          `;
+        });
       });
     });
-  }
+  };
 
-  mostrarTabla("masculino");
-
-  window.reiniciarTorneo = function () {
-    if (confirm("¿Estás seguro de que deseas reiniciar todo el torneo? Esto eliminará todas las tablas, historial y goleadores.")) {
+  window.reiniciarTorneo = () => {
+    if (confirm("¿Estás seguro de reiniciar todo?")) {
       const refs = ["posicionesMasculino", "posicionesFemenino", "historialPartidos", "goleadores", "goleadoresDetalles"];
-      refs.forEach((key) => remove(ref(db, key)));
-      alert("Torneo reiniciado correctamente.");
+      refs.forEach(path => remove(ref(db, path)));
+      alert("Torneo reiniciado.");
       location.reload();
     }
   };
+
+  window.toggleMenu = () => {
+    document.getElementById('navLinks').classList.toggle('active');
+  };
+
+  mostrarTabla("masculino");
 </script>
 
 </body>

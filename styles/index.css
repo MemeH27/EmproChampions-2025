@@ -1,13 +1,14 @@
+/* =================== FUENTE =================== */
 @font-face {
   font-family: 'Qatar2022';
   src: url('../qatar2022.ttf') format('truetype');
 }
 * {
-      box-sizing: border-box;
-      font-family: 'Qatar2022', sans-serif;
-  }
+  box-sizing: border-box;
+  font-family: 'Qatar2022', sans-serif;
+}
 
-
+/* =================== ESTILOS GENERALES =================== */
 body {
   margin: 0;
   padding: 0;
@@ -18,8 +19,15 @@ body {
   flex-direction: column;
   align-items: center;
 }
+h1 {
+  font-size: 100px;
+  margin-top: 200px;
+  margin-bottom: 0px;
+  color: white;
+}
 
-/* === NAVBAR NORMAL === */
+
+/* =================== NAVBAR =================== */
 nav {
   background-color: rgba(0, 0, 0, 0.4);
   padding: 10px 20px;
@@ -32,6 +40,12 @@ nav {
   align-items: center;
 }
 
+nav img {
+  height: 75px;
+  margin-left: 30px;
+}
+
+
 nav .links {
   display: flex;
   gap: 20px;
@@ -43,14 +57,13 @@ nav a {
   font-size: 18px;
 }
 
-/* === MENÚ HAMBURGUESA === */
+/* =================== MENÚ HAMBURGUESA =================== */
 .menu-toggle {
   display: none;
   flex-direction: column;
   cursor: pointer;
   gap: 5px;
 }
-
 .menu-toggle span {
   width: 25px;
   height: 3px;
@@ -58,19 +71,10 @@ nav a {
   border-radius: 2px;
 }
 
-/* === TOGGLE BOTONES === */
+/* =================== BOTONES DE GENERO =================== */
 .toggle-container {
   margin: 100px auto 20px;
 }
-.logo-header {
-  width: 100%;
-  max-width: 600px;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-}
-
-
 .toggle-container button {
   padding: 10px 30px;
   margin: 0 10px;
@@ -80,44 +84,54 @@ nav a {
   cursor: pointer;
   font-weight: bold;
 }
-
 .btn-activo {
   background: #FFD700;
   color: #5a0f26;
 }
-
 .btn-inactivo {
   background: white;
   color: #8A1538;
 }
 
-/* === TABLA === */
+/* =================== TABLA =================== */
+.table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+  padding: 0 20px;
+}
 table {
-  width: 90%;
-  max-width: 1000px;
+  width: 100%;
+  min-width: 900px;
   margin: 30px auto 80px;
   background: white;
   color: #8A1538;
   border-collapse: collapse;
   font-size: 20px;
 }
-
 th, td {
   padding: 14px;
   border: 2px solid #C72C48;
+  text-align: left;
 }
-
 thead {
   background: #8A1538;
   color: white;
 }
+td img {
+  height: 30px;
+  margin-right: 10px;
+}
 
-/* === RESPONSIVE === */
+/* =================== RESPONSIVE =================== */
 @media screen and (max-width: 768px) {
+  h1 {
+    font-size: 40px;
+    margin-top: 90px;
+  }
+
   nav {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 10px 20px;
+    flex-direction: row;
+    justify-content: space-between;
   }
 
   .menu-toggle {
@@ -141,9 +155,6 @@ thead {
     margin: 10px 20px;
     font-size: 16px;
   }
-  h1 {
-    font-size: 28px;
-  }
 
   table {
     font-size: 14px;
@@ -157,20 +168,18 @@ thead {
     flex-direction: column;
     gap: 10px;
   }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  table th:first-child,
+  table td:first-child,
+  table th:nth-child(2),
+  table td:nth-child(2) {
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 2;
+  }
 }
-@media screen and (min-width: 769px) {
-  nav {
-    justify-content: center;
-  }
-
-  .menu-toggle {
-    display: none;
-  }
-
-  nav .links {
-    display: flex !important;
-    flex-direction: row;
-    align-items: center;
-  }
-}
-
