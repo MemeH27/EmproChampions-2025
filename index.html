@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Tabla de Posiciones - Empro Champions</title>
-  <link rel="stylesheet" href="styles/index.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles/index.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
 <body>
 
@@ -40,52 +40,7 @@
   </thead>
   <tbody id="tablaCuerpo"></tbody>
 </table>
-<script>
-  let generoActual = "masculino";
 
-  function mostrarTabla(genero) {
-    generoActual = genero;
-
-    const btnM = document.getElementById("btnMasculino");
-    const btnF = document.getElementById("btnFemenino");
-
-    if (genero === "masculino") {
-      btnM.classList.add("btn-activo");
-      btnM.classList.remove("btn-inactivo");
-      btnF.classList.remove("btn-activo");
-      btnF.classList.add("btn-inactivo");
-    } else {
-      btnF.classList.add("btn-activo");
-      btnF.classList.remove("btn-inactivo");
-      btnM.classList.remove("btn-activo");
-      btnM.classList.add("btn-inactivo");
-    }
-
-    const data = JSON.parse(localStorage.getItem(
-      genero === "femenino" ? "posicionesFemenino" : "posicionesMasculino"
-    )) || {};
-
-    const tabla = Object.entries(data).map(([equipo, s]) => ({
-      equipo, ...s, DG: s.GF - s.GC
-    })).sort((a, b) => b.Pts - a.Pts || b.DG - a.DG || b.GF - a.GF);
-
-    const cuerpo = document.getElementById("tablaCuerpo");
-    cuerpo.innerHTML = "";
-
-    tabla.forEach((row, i) => {
-      cuerpo.innerHTML += `
-        <tr>
-          <td>${i + 1}</td><td>${row.equipo}</td><td>${row.PJ}</td>
-          <td>${row.G}</td><td>${row.E}</td><td>${row.P}</td>
-          <td>${row.GF}</td><td>${row.GC}</td><td>${row.DG}</td><td>${row.Pts}</td>
-        </tr>
-      `;
-    });
-  }
-
-  // Mostrar masculino al iniciar
-  mostrarTabla("masculino");
-</script>
 <div style="margin-bottom: 60px;">
   <button onclick="reiniciarTorneo()" style="
     background: transparent;
@@ -103,41 +58,78 @@
 </div>
 
 <script>
-  function reiniciarTorneo() {
-    if (confirm("¿Estás seguro de que deseas reiniciar todo el torneo? Esto eliminará todas las tablas, historial y goleadores.")) {
-      localStorage.clear();
-      alert("Torneo reiniciado correctamente.");
-      location.reload();
-    }
-  }
-</script>
-<script>
   function toggleMenu() {
     document.getElementById('navLinks').classList.toggle('active');
   }
 </script>
+
 <script type="module">
-  // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+  import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
     apiKey: "AIzaSyD9cpSfGG212h80iXofJetw-B-arEEcOvI",
     authDomain: "emprochampions2025.firebaseapp.com",
     projectId: "emprochampions2025",
-    storageBucket: "emprochampions2025.firebasestorage.app",
+    storageBucket: "emprochampions2025.appspot.com",
     messagingSenderId: "683206087538",
     appId: "1:683206087538:web:8a1473aec968bd6ab543eb",
     measurementId: "G-3TX5J3NDT5"
   };
 
-  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
+  const db = getDatabase();
+
+  let generoActual = "masculino";
+
+  function mostrarTabla(genero) {
+    generoActual = genero;
+
+    const btnM = document.getElementById("btnMasculino");
+    const btnF = document.getElementById("btnFemenino");
+
+    btnM.classList.toggle("btn-activo", genero === "masculino");
+    btnM.classList.toggle("btn-inactivo", genero !== "masculino");
+    btnF.classList.toggle("btn-activo", genero === "femenino");
+    btnF.classList.toggle("btn-inactivo", genero !== "femenino");
+
+    const ruta = genero === "femenino" ? "posicionesFemenino" : "posicionesMasculino";
+    const tablaRef = ref(db, ruta);
+
+    onValue(tablaRef, (snapshot) => {
+      const data = snapshot.val() || {};
+      const tabla = Object.entries(data).map(([equipo, s]) => ({
+        equipo, ...s, DG: s.GF - s.GC
+      })).sort((a, b) => b.Pts - a.Pts || b.DG - a.DG || b.GF - a.GF);
+
+      const cuerpo = document.getElementById("tablaCuerpo");
+      cuerpo.innerHTML = "";
+
+      tabla.forEach((row, i) => {
+        cuerpo.innerHTML += `
+          <tr>
+            <td>${i + 1}</td><td>${row.equipo}</td><td>${row.PJ}</td>
+            <td>${row.G}</td><td>${row.E}</td><td>${row.P}</td>
+            <td>${row.GF}</td><td>${row.GC}</td><td>${row.DG}</td><td>${row.Pts}</td>
+          </tr>
+        `;
+      });
+    });
+  }
+
+  mostrarTabla("masculino");
+
+  window.reiniciarTorneo = function () {
+    if (confirm("¿Estás seguro de que deseas reiniciar todo el torneo? Esto eliminará todas las tablas, historial y goleadores.")) {
+      const refs = ["posicionesMasculino", "posicionesFemenino", "historialPartidos", "goleadores", "goleadoresDetalles"];
+      refs.forEach((key) => remove(ref(db, key)));
+      alert("Torneo reiniciado correctamente.");
+      location.reload();
+    }
+  };
 </script>
+
 </body>
 </html>

@@ -5,6 +5,65 @@
   <title>Historial de Partidos</title>
   <link rel="stylesheet" href="styles/historial.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD9cpSfGG212h80iXofJetw-B-arEEcOvI",
+      authDomain: "emprochampions2025.firebaseapp.com",
+      projectId: "emprochampions2025",
+      storageBucket: "emprochampions2025.appspot.com",
+      messagingSenderId: "683206087538",
+      appId: "1:683206087538:web:8a1473aec968bd6ab543eb",
+      measurementId: "G-3TX5J3NDT5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      const historialRef = ref(db, "historialPartidos");
+      const snapshot = await get(historialRef);
+      const historial = snapshot.val() || [];
+
+      const masculino = document.getElementById("columnaMasculino");
+      const femenino = document.getElementById("columnaFemenino");
+
+      historial.forEach((p, i) => {
+        const id = `detalle-${i}`;
+        const tiempoTexto = `${String(Math.floor(p.tiempo / 60)).padStart(2, '0')}:${String(p.tiempo % 60).padStart(2, '0')}`;
+
+        const partidoHTML = `
+          <div class="partido">
+            <div class="resumen">
+              <div>
+                🗓️ ${p.fecha}<br>
+                🆚 ${p.equipo1} vs ${p.equipo2}
+              </div>
+              <div class="marcador">${p.marcador}</div>
+              <button class="btn-toggle" onclick="toggleDetalles('${id}')">Ver más</button>
+            </div>
+            <div class="detalles" id="${id}">
+              ⚥ Género: ${p.genero}<br>
+              ⏱️ Tiempo jugado: ${tiempoTexto}
+            </div>
+          </div>
+        `;
+
+        if (p.genero === "femenino") {
+          femenino.innerHTML += partidoHTML;
+        } else {
+          masculino.innerHTML += partidoHTML;
+        }
+      });
+    });
+
+    window.toggleDetalles = (id) => {
+      const div = document.getElementById(id);
+      div.style.display = div.style.display === 'block' ? 'none' : 'block';
+    };
+  </script>
 </head>
 <body>
 
@@ -19,7 +78,6 @@
   <img src="logo4.png" alt="Historial de Partidos" style="max-width: 90%; height: auto;" />
 </div>
 
-
 <div class="historial-container">
   <div class="columna" id="columnaMasculino">
     <h2>Masculino</h2>
@@ -28,46 +86,6 @@
     <h2>Femenino</h2>
   </div>
 </div>
-
-<script>
-  const historial = JSON.parse(localStorage.getItem("historialPartidos")) || [];
-
-  const masculino = document.getElementById("columnaMasculino");
-  const femenino = document.getElementById("columnaFemenino");
-
-  historial.forEach((p, i) => {
-    const id = `detalle-${i}`;
-    const tiempoTexto = `${String(Math.floor(p.tiempo / 60)).padStart(2, '0')}:${String(p.tiempo % 60).padStart(2, '0')}`;
-
-    const partidoHTML = `
-      <div class="partido">
-        <div class="resumen">
-          <div>
-            🗓️ ${p.fecha}<br>
-            🆚 ${p.equipo1} vs ${p.equipo2}
-          </div>
-          <div class="marcador">${p.marcador}</div>
-          <button class="btn-toggle" onclick="toggleDetalles('${id}')">Ver más</button>
-        </div>
-        <div class="detalles" id="${id}">
-          ⚥ Género: ${p.genero}<br>
-          ⏱️ Tiempo jugado: ${tiempoTexto}
-        </div>
-      </div>
-    `;
-
-    if (p.genero === "femenino") {
-      femenino.innerHTML += partidoHTML;
-    } else {
-      masculino.innerHTML += partidoHTML;
-    }
-  });
-
-  function toggleDetalles(id) {
-    const div = document.getElementById(id);
-    div.style.display = div.style.display === 'block' ? 'none' : 'block';
-  }
-</script>
 
 </body>
 </html>

@@ -3,8 +3,105 @@
 <head>
   <meta charset="UTF-8" />
   <title>Máximos Goleadores</title>
- <link rel="stylesheet" href="styles/goleadores.css">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles/goleadores.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD9cpSfGG212h80iXofJetw-B-arEEcOvI",
+      authDomain: "emprochampions2025.firebaseapp.com",
+      projectId: "emprochampions2025",
+      storageBucket: "emprochampions2025.appspot.com",
+      messagingSenderId: "683206087538",
+      appId: "1:683206087538:web:8a1473aec968bd6ab543eb",
+      measurementId: "G-3TX5J3NDT5"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    let generoActual = "masculino";
+    let detallesGlobal = {};
+
+    async function mostrarGoleadores(genero) {
+      generoActual = genero;
+
+      document.getElementById("btnMasculino").classList.toggle("btn-activo", genero === "masculino");
+      document.getElementById("btnMasculino").classList.toggle("btn-inactivo", genero !== "masculino");
+      document.getElementById("btnFemenino").classList.toggle("btn-activo", genero === "femenino");
+      document.getElementById("btnFemenino").classList.toggle("btn-inactivo", genero !== "femenino");
+
+      const detallesRef = ref(db, 'goleadoresDetalles');
+      const detallesSnap = await get(detallesRef);
+      detallesGlobal = detallesSnap.val() || {};
+
+      const tabla = contarGolesPorGenero(detallesGlobal, genero);
+      const lista = Object.entries(tabla)
+        .map(([nombre, cantidad]) => ({ nombre, cantidad }))
+        .sort((a, b) => b.cantidad - a.cantidad);
+
+      const tbody = document.getElementById("tablaGoleadores");
+      tbody.innerHTML = "";
+
+      lista.forEach((jugador, i) => {
+        const idDetalle = `detalles-${i}`;
+        tbody.innerHTML += `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${jugador.nombre}</td>
+            <td>${jugador.cantidad}</td>
+            <td><button class="btn-detalle" onclick="toggleDetalle('${idDetalle}')">Ver Detalles</button></td>
+          </tr>
+          <tr>
+            <td colspan="4">
+              <div id="${idDetalle}" class="detalles" style="display: none;">
+                ${renderDetalles(jugador.nombre)}
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function contarGolesPorGenero(detalles, genero) {
+      const contador = {};
+      for (const [nombre, lista] of Object.entries(detalles)) {
+        const golesFiltrados = lista.filter(g => g.genero === genero);
+        if (golesFiltrados.length > 0) {
+          contador[nombre] = golesFiltrados.length;
+        }
+      }
+      return contador;
+    }
+
+    function renderDetalles(nombre) {
+      const lista = detallesGlobal[nombre] || [];
+      const filtrados = lista.filter(p => p.genero === generoActual);
+      if (filtrados.length === 0) return "<em>Sin detalles registrados</em>";
+
+      return filtrados.map(d => `
+        <div class="detalle-item">
+          📅 <strong>${d.fecha}</strong><br>
+          ⚽ ${d.equipo1} vs ${d.equipo2}<br>
+          ⏱️ Minuto ${d.minuto}
+        </div>
+      `).join("");
+    }
+
+    window.toggleDetalle = (id) => {
+      const div = document.getElementById(id);
+      div.style.display = div.style.display === "block" ? "none" : "block";
+    };
+
+    window.mostrarGoleadores = mostrarGoleadores;
+
+    // Iniciar con masculino
+    window.addEventListener("DOMContentLoaded", () => {
+      mostrarGoleadores("masculino");
+    });
+  </script>
 </head>
 <body>
 
@@ -32,81 +129,6 @@
   </thead>
   <tbody id="tablaGoleadores"></tbody>
 </table>
-
-<script>
-  let generoActual = "masculino";
-
-  function contarGolesPorGenero(detalles, genero) {
-    const contador = {};
-    for (const [nombre, lista] of Object.entries(detalles)) {
-      const golesFiltrados = lista.filter(g => g.genero === genero);
-      if (golesFiltrados.length > 0) {
-        contador[nombre] = golesFiltrados.length;
-      }
-    }
-    return contador;
-  }
-
-  function mostrarGoleadores(genero) {
-    generoActual = genero;
-
-    document.getElementById("btnMasculino").classList.toggle("btn-activo", genero === "masculino");
-    document.getElementById("btnMasculino").classList.toggle("btn-inactivo", genero !== "masculino");
-    document.getElementById("btnFemenino").classList.toggle("btn-activo", genero === "femenino");
-    document.getElementById("btnFemenino").classList.toggle("btn-inactivo", genero !== "femenino");
-
-    const detalles = JSON.parse(localStorage.getItem("goleadoresDetalles")) || {};
-    const tabla = contarGolesPorGenero(detalles, genero);
-
-    const lista = Object.entries(tabla)
-      .map(([nombre, cantidad]) => ({ nombre, cantidad }))
-      .sort((a, b) => b.cantidad - a.cantidad);
-
-    const tbody = document.getElementById("tablaGoleadores");
-    tbody.innerHTML = "";
-
-    lista.forEach((jugador, i) => {
-      const idDetalle = `detalles-${i}`;
-      tbody.innerHTML += `
-        <tr>
-          <td>${i + 1}</td>
-          <td>${jugador.nombre}</td>
-          <td>${jugador.cantidad}</td>
-          <td><button class="btn-detalle" onclick="toggleDetalle('${idDetalle}')">Ver Detalles</button></td>
-        </tr>
-        <tr>
-          <td colspan="4">
-            <div id="${idDetalle}" class="detalles">
-              ${renderDetalles(jugador.nombre, genero)}
-            </div>
-          </td>
-        </tr>
-      `;
-    });
-  }
-
-  function renderDetalles(nombre, genero) {
-    const lista = (JSON.parse(localStorage.getItem("goleadoresDetalles")) || {})[nombre] || [];
-    const filtrados = lista.filter(p => p.genero === genero);
-    if (filtrados.length === 0) return "<em>Sin detalles registrados</em>";
-
-    return filtrados.map(d => `
-      <div class="detalle-item">
-        📅 <strong>${d.fecha}</strong><br>
-        ⚽ ${d.equipo1} vs ${d.equipo2}<br>
-        ⏱️ Minuto ${d.minuto}
-      </div>
-    `).join("");
-  }
-
-  function toggleDetalle(id) {
-    const div = document.getElementById(id);
-    div.style.display = div.style.display === "block" ? "none" : "block";
-  }
-
-  // Mostrar por defecto masculino
-  mostrarGoleadores("masculino");
-</script>
 
 </body>
 </html>
