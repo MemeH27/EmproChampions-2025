@@ -156,7 +156,7 @@
         marcador: `${goles1} - ${goles2}`,
         tiempo: `${String(Math.floor(tiempo / 60)).padStart(2, '0')}:${String(tiempo % 60).padStart(2, '0')}`
       };
-      push(historialRef, nuevoHistorial);
+      await push(historialRef, nuevoHistorial);
 
       // Tabla de goleadores
       const tablaRef = ref(db, "goleadores");
