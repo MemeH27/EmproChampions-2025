@@ -5,6 +5,13 @@
   <title>Seleccionar Equipos - Empro Champions</title>
   <link rel="stylesheet" href="styles/match.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module">
+      import { generarNavbar } from "./scripts/navbar.js";
+      window.addEventListener("DOMContentLoaded", () => {
+      generarNavbar(window.location.pathname);
+    });
+  </script>
+  <link rel="stylesheet" href="styles/navbar.css">
 </head>
 <body>
 
@@ -34,9 +41,14 @@
 <button class="start-btn" onclick="iniciarPartido()">INICIAR PARTIDO</button>
 
 <script>
+  const rol = localStorage.getItem("rol");
+  if (rol !== "admin") {
+    window.location.href = "login.html";
+  }
+
   const equiposBase = [
     { name: "Don Bosco", logo: "LOGOS COMUS/LOGO SAN JUAN BOSCO.png" },
-    { name: "Luz en mi Camino", logo: "LOGOS COMUS/LUZ EN MI CAMINO.png" },
+    { name: "Luz en mi Camino", logo: "LOGOS COMUS/LOGO LUZ EN MI CAMINO.png" },
     { name: "Huellas de Jesús", logo: "LOGOS COMUS/LOGO HUELLAS DE JESUS.png" },
     { name: "Mensajeros de Paz", logo: "LOGOS COMUS/LOGO MENSAJEROS DE PAZ.png" },
     { name: "Atrapados en su Red", logo: "LOGOS COMUS/LOGO ATRAPADOS.png" }
@@ -56,13 +68,11 @@
     document.getElementById('btnFemenino').classList.remove('active');
     document.getElementById(`btn${gen.charAt(0).toUpperCase() + gen.slice(1)}`).classList.add('active');
 
-    // Clonar base y agregar Emprosaurios solo a masculino
     equipos = [...equiposBase];
     if (genero === "masculino") {
       equipos.push(equipoExtraMasculino);
     }
 
-    // Reiniciar índices y actualizar tarjetas
     index1 = 0;
     index2 = 1;
     updateCards();
@@ -114,7 +124,6 @@
     window.location.href = "control.html";
   }
 
-  // Cargar masculino por defecto
   setGenero("masculino");
 </script>
 

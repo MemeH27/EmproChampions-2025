@@ -15,72 +15,74 @@
       projectId: "emprochampions2025",
       storageBucket: "emprochampions2025.appspot.com",
       messagingSenderId: "683206087538",
-      appId: "1:683206087538:web:8a1473aec968bd6ab543eb",
-      measurementId: "G-3TX5J3NDT5"
+      appId: "1:683206087538:web:8a1473aec968bd6ab543eb"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    const rol = localStorage.getItem("rol");
+    if (!rol) window.location.href = "login.html";
+
     window.addEventListener("DOMContentLoaded", async () => {
-  const historialRef = ref(db, "historialPartidos");
-  const snapshot = await get(historialRef);
-  const historialData = snapshot.val();
+      const historialRef = ref(db, "historialPartidos");
+      const snapshot = await get(historialRef);
+      const historialData = snapshot.val();
 
-  const masculino = document.getElementById("columnaMasculino");
-  const femenino = document.getElementById("columnaFemenino");
+      const masculino = document.getElementById("columnaMasculino");
+      const femenino = document.getElementById("columnaFemenino");
 
-  if (!historialData) return;
+      if (!historialData) return;
 
-  const historial = Object.values(historialData); // <- 🔥 Aquí está la magia
+      const historial = Object.values(historialData);
 
-  historial.forEach((p, i) => {
-    const id = `detalle-${i}`;
-    const tiempoTexto = p.tiempo || "00:00";
+      historial.forEach((p, i) => {
+        const id = `detalle-${i}`;
+        const tiempoTexto = p.tiempo || p.minutos || "00:00";
+        const mvpTexto = p.mvp ? `<br>⭐ MVP: ${p.mvp}` : "";
 
-    const partidoHTML = `
-      <div class="partido">
-        <div class="resumen">
-          <div>
-            🗓️ ${p.fecha}<br>
-            🆚 ${p.equipo1} vs ${p.equipo2}
+        const partidoHTML = `
+          <div class="partido">
+            <div class="resumen">
+              <div>
+                🗓️ ${p.fecha}<br>
+                🆚 ${p.equipo1} vs ${p.equipo2}
+              </div>
+              <div class="marcador">${p.marcador}</div>
+              <button class="btn-toggle" onclick="toggleDetalles('${id}')">Ver más</button>
+            </div>
+            <div class="detalles" id="${id}">
+              ⚥ Género: ${p.genero}<br>
+              ⏱️ Tiempo jugado: ${tiempoTexto}${mvpTexto}
+            </div>
           </div>
-          <div class="marcador">${p.marcador}</div>
-          <button class="btn-toggle" onclick="toggleDetalles('${id}')">Ver más</button>
-        </div>
-        <div class="detalles" id="${id}">
-          ⚥ Género: ${p.genero}<br>
-          ⏱️ Tiempo jugado: ${tiempoTexto}
-        </div>
-      </div>
-    `;
+        `;
 
-    if (p.genero === "femenino") {
-      femenino.innerHTML += partidoHTML;
-    } else {
-      masculino.innerHTML += partidoHTML;
-    }
-  });
-});
-
+        if (p.genero === "femenino") {
+          femenino.innerHTML += partidoHTML;
+        } else {
+          masculino.innerHTML += partidoHTML;
+        }
+      });
+    });
 
     window.toggleDetalles = (id) => {
       const div = document.getElementById(id);
       div.style.display = div.style.display === 'block' ? 'none' : 'block';
     };
   </script>
+  <script type="module">
+      import { generarNavbar } from "./scripts/navbar.js";
+      window.addEventListener("DOMContentLoaded", () => {
+      generarNavbar(window.location.pathname);
+    });
+  </script>
+  <link rel="stylesheet" href="styles/navbar.css">
 </head>
 <body>
 
-<nav>
-  <a href="index.html">📊 Tabla</a>
-  <a href="match.html">🎮 Nuevo Partido</a>
-  <a href="goleadores.html">🥇 Máximo Goleador</a>
-  <a href="historial.html">📋 Historial de Partidos</a>
-</nav>
-
-<div style="margin-top: 100px; text-align: center;">
-  <img src="logo4.png" alt="Historial de Partidos" style="max-width: 90%; height: auto;" />
+<div class="logo">
+  <img src="logo4.png" alt="Logo Goleadores" style="max-width: 100%; height: auto;" />
 </div>
 
 <div class="historial-container">

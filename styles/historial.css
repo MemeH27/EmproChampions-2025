@@ -1,105 +1,115 @@
 @font-face {
-      font-family: 'Qatar2022';
-      src: url('../qatar2022.ttf') format('truetype');
-    }
+  font-family: 'Qatar2022';
+  src: url('../qatar2022.ttf') format('truetype');
+}
 
-    * {
-      font-family: 'Qatar2022', sans-serif;
-      box-sizing: border-box;
-    }
+* {
+  font-family: 'Qatar2022', sans-serif;
+  box-sizing: border-box;
+}
 
-    body {
-      margin: 0;
-      padding: 0;
-      background: radial-gradient(circle at center, #8A1538, #5a0f26);
-      color: white;
-    }
+body {
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(circle at center, #8A1538, #5a0f26);
+  color: white;
+}
 
-    nav {
-      background-color: rgba(0, 0, 0, 0.4);
-      padding: 10px;
-      text-align: center;
-      position: fixed;
-      width: 100%;
-      top: 0;
-      z-index: 10;
-    }
+h1 {
+  text-align: center;
+  margin-top: 80px;
+  font-size: 36px;
+}
 
-    nav a {
-      color: white;
-      margin: 0 20px;
-      text-decoration: none;
-      font-size: 18px;
-    }
+.historial-container {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  padding: 40px 20px;
+  max-width: 1300px;
+  margin: auto;
+  flex-wrap: wrap;
+}
+.logo {
+  margin-top: 100px;
+  padding: 1.5rem;
+}
+.columna {
+  flex: 1;
+  min-width: 400px;
+}
 
-    h1 {
-      text-align: center;
-      margin-top: 80px;
-      font-size: 36px;
-    }
+.columna h2 {
+  text-align: center;
+  font-size: 24px;
+  color: #FFD700;
+  margin-bottom: 20px;
+}
 
-    .historial-container {
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      padding: 40px 20px;
-      max-width: 1300px;
-      margin: auto;
-      flex-wrap: wrap;
-    }
+.partido {
+  background: #fff;
+  color: #8A1538;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(255,255,255,0.1);
+}
 
-    .columna {
-      flex: 1;
-      min-width: 400px;
-    }
+.resumen {
+  padding: 20px;
+  font-size: 18px;
+  border-bottom: 1px solid #c72c48;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
 
-    .columna h2 {
-      text-align: center;
-      font-size: 24px;
-      color: #FFD700;
-      margin-bottom: 20px;
-    }
+.marcador {
+  font-size: 28px;
+  font-weight: bold;
+  color: #5a0f26;
+  background: #ffd700;
+  padding: 6px 16px;
+  border-radius: 10px;
+}
 
-    .partido {
-      background: #fff;
-      color: #8A1538;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      overflow: hidden;
-      box-shadow: 0 0 10px rgba(255,255,255,0.1);
-    }
+.detalles {
+  display: none;
+  padding: 20px;
+  font-size: 16px;
+  background: #fcecec;
+  line-height: 1.6;
+}
 
-    .resumen {
-      padding: 20px;
-      font-size: 18px;
-      border-bottom: 1px solid #c72c48;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+.detalles::before {
+  content: "\1F3C6 ";
+  display: inline;
+  font-size: 18px;
+  color: #FFD700;
+}
 
-    .marcador {
-      font-size: 28px;
-      font-weight: bold;
-      color: #5a0f26;
-      background: #ffd700;
-      padding: 6px 16px;
-      border-radius: 10px;
-    }
+.btn-toggle {
+  background: #8A1538;
+  color: white;
+  font-size: 14px;
+  padding: 6px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
 
-    .detalles {
-      display: none;
-      padding: 20px;
-      font-size: 16px;
-      background: #fcecec;
-    }
+@media screen and (max-width: 768px) {
+  .btn-toggle {
+    font-size: 16px;
+    padding: 10px 18px;
+    width: 100%;
+    box-sizing: border-box;
+  }
 
-    .btn-toggle {
-      background: #8A1538;
-      color: white;
-      font-size: 14px;
-      padding: 6px 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
+  .resumen {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}

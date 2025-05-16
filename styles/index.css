@@ -20,43 +20,11 @@ body {
   align-items: center;
 }
 h1 {
-  font-size: 100px;
-  margin-top: 200px;
-  margin-bottom: 0px;
+  font-size: 60px;
+  margin: 100px 0 40px;
   color: white;
+  line-height: 1.2;
 }
-
-
-/* =================== NAVBAR =================== */
-nav {
-  background-color: rgba(0, 0, 0, 0.4);
-  padding: 10px 20px;
-  position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 10;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-nav img {
-  height: 75px;
-  margin-left: 30px;
-}
-
-
-nav .links {
-  display: flex;
-  gap: 20px;
-}
-
-nav a {
-  color: white;
-  text-decoration: none;
-  font-size: 18px;
-}
-
 /* =================== MENÚ HAMBURGUESA =================== */
 .menu-toggle {
   display: none;
@@ -70,10 +38,14 @@ nav a {
   background: white;
   border-radius: 2px;
 }
+.logo {
+  margin-top: 100px;
+  padding: 1.5rem;
+}
 
 /* =================== BOTONES DE GENERO =================== */
 .toggle-container {
-  margin: 100px auto 20px;
+  margin: 20px auto;
 }
 .toggle-container button {
   padding: 10px 30px;
@@ -95,27 +67,31 @@ nav a {
 
 /* =================== TABLA =================== */
 .table-wrapper {
+  position: relative;
   overflow-x: auto;
   width: 100%;
   padding: 0 20px;
+  scroll-padding-left: 40px; /* límite visual al hacer scroll */
 }
 table {
   width: 100%;
   min-width: 900px;
-  margin: 30px auto 80px;
+  margin: 20px auto 40px;
   background: white;
   color: #8A1538;
   border-collapse: collapse;
-  font-size: 20px;
+  font-size: 18px;
 }
 th, td {
-  padding: 14px;
+  padding: 10px 8px;
   border: 2px solid #C72C48;
   text-align: left;
+  white-space: nowrap;
+  background-color: white;
 }
-thead {
-  background: #8A1538;
-  color: white;
+thead th {
+  background: #8A1538 !important;
+  color: white !important;
 }
 td img {
   height: 30px;
@@ -125,35 +101,11 @@ td img {
 /* =================== RESPONSIVE =================== */
 @media screen and (max-width: 768px) {
   h1 {
-    font-size: 40px;
-    margin-top: 90px;
+    font-size: 36px;
+    margin: 100px 0 30px;
   }
-
-  nav {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-
   .menu-toggle {
     display: flex;
-  }
-
-  nav .links {
-    display: none;
-    flex-direction: column;
-    width: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    margin-top: 10px;
-    padding: 10px 0;
-  }
-
-  nav .links.active {
-    display: flex;
-  }
-
-  nav a {
-    margin: 10px 20px;
-    font-size: 16px;
   }
 
   table {
@@ -161,7 +113,7 @@ td img {
   }
 
   th, td {
-    padding: 10px;
+    padding: 8px 6px;
   }
 
   .toggle-container {
@@ -169,17 +121,31 @@ td img {
     gap: 10px;
   }
 
-  .table-wrapper {
-    overflow-x: auto;
+  table th:first-child,
+  table td:first-child {
+    position: sticky;
+    left: 0;
+    background: #ffffff;
+    z-index: 3;
   }
 
-  table th:first-child,
-  table td:first-child,
   table th:nth-child(2),
   table td:nth-child(2) {
     position: sticky;
-    left: 0;
-    background: white;
+    left: 40px;
+    background: #ffffff;
     z-index: 2;
+  }
+
+  table thead th:first-child {
+    background: #8A1538 !important;
+    color: white !important;
+    z-index: 4;
+  }
+
+  table thead th:nth-child(2) {
+    background: #8A1538 !important;
+    color: white !important;
+    z-index: 3;
   }
 }

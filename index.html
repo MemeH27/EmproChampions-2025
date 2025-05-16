@@ -5,43 +5,39 @@
   <title>Tabla de Posiciones</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles/index.css" />
+  <script type="module">
+      import { generarNavbar } from "./scripts/navbar.js";
+      window.addEventListener("DOMContentLoaded", () => {
+      generarNavbar(window.location.pathname);
+    });
+  </script>
+  <link rel="stylesheet" href="styles/navbar.css">
 </head>
 <body>
 
-<nav>
-  <img src="logo.png" alt="Logo" />
-  <div class="menu-toggle" onclick="toggleMenu()">
-    <span></span>
-    <span></span>
-    <span></span>
-  </div>
-  <div class="links" id="navLinks">
-    <a href="index.html">🏆 Tabla</a>
-    <a href="match.html">🎮 Nuevo Partido</a>
-    <a href="goleadores.html">🥇 Goleadores</a>
-    <a href="historial.html">📋 Historial</a>
-  </div>
-</nav>
-
-<h1>Tabla de Posiciones</h1>
+<div class="logo">
+  <img src="logo2.png" alt="Logo Goleadores" style="max-width: 100%; height: auto;" />
+</div>
 
 <div class="toggle-container">
   <button id="btnMasculino" onclick="mostrarTabla('masculino')" class="btn-activo">Masculino</button>
   <button id="btnFemenino" onclick="mostrarTabla('femenino')" class="btn-inactivo">Femenino</button>
 </div>
 
-<table>
-  <thead>
-    <tr>
-      <th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th>
-      <th>GF</th><th>GC</th><th>DG</th><th>Pts</th><th>Últimos 5</th>
-    </tr>
-  </thead>
-  <tbody id="tablaCuerpo"></tbody>
-</table>
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th>
+        <th>GF</th><th>GC</th><th>DG</th><th>Pts</th><th>Últimos 5</th>
+      </tr>
+    </thead>
+    <tbody id="tablaCuerpo"></tbody>
+  </table>
+</div>
 
 <div style="margin-bottom: 60px;">
-  <button onclick="reiniciarTorneo()" style="
+  <button onclick="reiniciarTorneo()" id="btnReiniciar" style="
     background: transparent;
     border: 2px solid white;
     color: white;
@@ -66,13 +62,19 @@
     projectId: "emprochampions2025",
     storageBucket: "emprochampions2025.appspot.com",
     messagingSenderId: "683206087538",
-    appId: "1:683206087538:web:8a1473aec968bd6ab543eb",
-    measurementId: "G-3TX5J3NDT5"
+    appId: "1:683206087538:web:8a1473aec968bd6ab543eb"
   };
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
   let generoActual = "masculino";
+
+  const rol = localStorage.getItem("rol");
+  if (!rol) window.location.href = "login.html";
+  if (rol === "usuario") {
+    document.getElementById("linkMatch").style.display = "none";
+    document.getElementById("btnReiniciar").style.display = "none";
+  }
 
   window.mostrarTabla = (genero) => {
     generoActual = genero;
@@ -93,11 +95,9 @@
         const historial = snap.val() || {};
         const ultimos = {};
 
-        // Prepara resultados por equipo
         Object.values(historial).forEach(p => {
           if (p.genero !== genero) return;
-          const r1 = p.marcador.split(" - ").map(Number);
-          const g1 = r1[0], g2 = r1[1];
+          const [g1, g2] = p.marcador.split(" - ").map(Number);
           const e1 = p.equipo1, e2 = p.equipo2;
 
           if (!ultimos[e1]) ultimos[e1] = [];
@@ -112,7 +112,10 @@
 
         const tabla = Object.entries(posiciones).map(([equipo, s]) => ({
           equipo,
-          logo: s.logo || `LOGOS COMUS/LOGO ${equipo.toUpperCase()}.png`,
+          logo: s.logo || (() => {
+            if (equipo === "Don Bosco") return "LOGOS COMUS/LOGO SAN JUAN BOSCO.png";
+            return `LOGOS COMUS/LOGO ${encodeURIComponent(equipo.toUpperCase())}.png`;
+          })(),
           ...s,
           DG: s.GF - s.GC,
           ult: ultimos[equipo] || []

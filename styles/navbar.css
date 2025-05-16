@@ -1,0 +1,70 @@
+/* ================= NAVBAR GLOBAL ================= */
+
+nav {
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 10px 20px;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+nav img {
+  max-height: 60px;
+  max-width: 120px;
+  object-fit: contain;
+  margin-left: 20px;
+}
+
+nav .links {
+  display: flex;
+  gap: 20px;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+/* Menú hamburguesa */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
+}
+.menu-toggle span {
+  width: 25px;
+  height: 3px;
+  background: white;
+  border-radius: 2px;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+  nav .links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    margin-top: 10px;
+    padding: 10px 0;
+  }
+
+  nav .links.active {
+    display: flex;
+  }
+
+  .menu-toggle {
+    display: flex;
+  }
+
+  nav a {
+    margin: 10px 20px;
+    font-size: 16px;
+  }
+}

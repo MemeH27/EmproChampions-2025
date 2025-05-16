@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-    import { getDatabase, ref, get, child } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
+    import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD9cpSfGG212h80iXofJetw-B-arEEcOvI",
@@ -21,6 +21,9 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+
+    const rol = localStorage.getItem("rol");
+    if (!rol) window.location.href = "login.html";
 
     let generoActual = "masculino";
     let detallesGlobal = {};
@@ -56,7 +59,7 @@
           </tr>
           <tr>
             <td colspan="4">
-              <div id="${idDetalle}" class="detalles" style="display: none;">
+              <div id="${idDetalle}" class="detalles">
                 ${renderDetalles(jugador.nombre)}
               </div>
             </td>
@@ -97,23 +100,22 @@
 
     window.mostrarGoleadores = mostrarGoleadores;
 
-    // Iniciar con masculino
     window.addEventListener("DOMContentLoaded", () => {
       mostrarGoleadores("masculino");
     });
   </script>
+  <script type="module">
+      import { generarNavbar } from "./scripts/navbar.js";
+      window.addEventListener("DOMContentLoaded", () => {
+      generarNavbar(window.location.pathname);
+    });
+  </script>
+  <link rel="stylesheet" href="styles/navbar.css">
 </head>
 <body>
 
-<nav>
-  <a href="index.html">📊 Tabla</a>
-  <a href="match.html">🎮 Nuevo Partido</a>
-  <a href="goleadores.html">🥇 Máximo Goleador</a>
-  <a href="historial.html">📋 Historial de Partidos</a>
-</nav>
-
 <div class="logo">
-  <img src="logo3.png" alt="Logo Goleadores" style="max-width: 90%; height: auto;" />
+  <img src="logo3.png" alt="Logo Goleadores" style="max-width: 100%; height: auto;" />
 </div>
 
 <div class="toggle-container">
