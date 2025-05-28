@@ -1,3 +1,15 @@
-<script>
-  location.replace("/EmproChampions-2025" + location.pathname);
-</script>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirecting...</title>
+    <script type="text/javascript">
+      // Redirige cualquier 404 a index.html preservando la ruta original
+      sessionStorage.redirect = location.pathname;
+      window.location.href = "/";
+    </script>
+  </head>
+  <body>
+    <p>Redirigiendo...</p>
+  </body>
+</html>
