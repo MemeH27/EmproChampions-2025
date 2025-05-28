@@ -7,12 +7,12 @@
   "theme_color": "#8d153a",
   "icons": [
     {
-      "src": "/EmproChampions-2025/icon-192.png",
+      "src": "/EmproChampions-2025/public/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/EmproChampions-2025/icon-512.png",
+      "src": "/EmproChampions-2025/public/icon-192.png",
       "sizes": "512x512",
       "type": "image/png"
     }
