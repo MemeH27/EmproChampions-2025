@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Qatar2022";
+  src: url("/qatar2022.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.font-qatar {
+  font-family: "Qatar2022", sans-serif;
+}

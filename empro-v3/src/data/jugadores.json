@@ -1,0 +1,52 @@
+{
+  "atrapados": [
+    { "nombre": "Juan Pérez", "dorsal": 7 },
+    { "nombre": "Carlos Torres", "dorsal": 10 },
+    { "nombre": "Luis López", "dorsal": 5 },
+    { "nombre": "Mario Paz", "dorsal": 11 },
+    { "nombre": "Erick Rodríguez", "dorsal": 2 },
+    { "nombre": "Erick 2", "dorsal": 0 },
+    { "nombre": "Antonio Díaz", "dorsal": 4 }
+  ],
+  "bosco": [
+    { "nombre": "Andrés Gutiérrez", "dorsal": 3 },
+    { "nombre": "David Martínez", "dorsal": 1 },
+    { "nombre": "Pedro Ramírez", "dorsal": 8 },
+    { "nombre": "Fernando Vargas", "dorsal": 9 },
+    { "nombre": "Raúl Cruz", "dorsal": 6 },
+    { "nombre": "Erick Rodríguez", "dorsal": 2 },
+    { "nombre": "Mauricio Salinas", "dorsal": 14 }
+  ],
+  "emprosaurios": [
+    { "nombre": "Saurio Uno", "dorsal": 21 },
+    { "nombre": "Saurio Dos", "dorsal": 22 },
+    { "nombre": "Saurio Tres", "dorsal": 23 },
+    { "nombre": "Saurio Cuatro", "dorsal": 24 },
+    { "nombre": "Saurio Cinco", "dorsal": 25 },
+    { "nombre": "Saurio Seis", "dorsal": 26 }
+  ],
+  "huellas": [
+    { "nombre": "Diego Muñoz", "dorsal": 2 },
+    { "nombre": "Bryan Mejía", "dorsal": 5 },
+    { "nombre": "Samuel Rivera", "dorsal": 8 },
+    { "nombre": "Kevin Palacios", "dorsal": 7 },
+    { "nombre": "José Martínez", "dorsal": 13 },
+    { "nombre": "Ricardo Castillo", "dorsal": 17 }
+  ],
+  "luz": [
+    { "nombre": "Oscar Varela", "dorsal": 4 },
+    { "nombre": "David Salgado", "dorsal": 12 },
+    { "nombre": "Enrique Orellana", "dorsal": 9 },
+    { "nombre": "Manuel Molina", "dorsal": 3 },
+    { "nombre": "Javier Castro", "dorsal": 16 },
+    { "nombre": "Julio Soto", "dorsal": 18 }
+  ],
+  "mensajeros": [
+    { "nombre": "Cristian Ayala", "dorsal": 19 },
+    { "nombre": "Luis Méndez", "dorsal": 6 },
+    { "nombre": "Álvaro Salinas", "dorsal": 11 },
+    { "nombre": "Sergio Paz", "dorsal": 8 },
+    { "nombre": "Oscar Aguilar", "dorsal": 20 },
+    { "nombre": "Juan Martínez", "dorsal": 15 }
+  ]
+}
