@@ -107,7 +107,7 @@ export default function Configuracion() {
   if (!datos) return <div className="text-white text-center mt-10">Cargando...</div>;
 
   return (
-    <div className="min-h-screen bg-cover bg-center text-white font-qatar" style={{ backgroundImage: "url('/img/fondoempro-horizontal.png')" }}>
+    <div className="min-h-screen bg-cover bg-center text-white font-qatar" style={{ backgroundImage: `url('${import.meta.env.BASE_URL}img/fondoempro-horizontal.png')` }}>
       <Navbar />
       <div className="flex items-center justify-center px-4 py-10">
         <div className="bg-white/90 rounded-2xl shadow-lg p-8 w-full max-w-md text-center text-black">

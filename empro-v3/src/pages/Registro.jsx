@@ -42,11 +42,12 @@ export default function Registro() {
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center flex items-center justify-center" style={{ backgroundImage: "url('/img/fondoempro-horizontal.png')" }}>
+    <div className="min-h-screen bg-cover bg-center flex items-center justify-center" style={{ backgroundImage: `url('${import.meta.env.BASE_URL}img/fondoempro-horizontal.png')` }}>
       <div className="bg-white/90 rounded-2xl shadow-lg p-8 w-full max-w-md text-center">
-        <img src="/img/logo-empro.png" alt="Logo Empro" className="w-24 mx-auto mb-4" />
+        <img src={`${import.meta.env.BASE_URL}img/logo-empro.png`} alt="Logo Empro" className="w-24 mx-auto mb-4" />
         <h1 className="text-3xl font-bold text-[#7a0026] mb-6">Crear Cuenta</h1>
         <form onSubmit={registrarUsuario} className="space-y-4">
+
           <input
             type="text"
             placeholder="Nombre"

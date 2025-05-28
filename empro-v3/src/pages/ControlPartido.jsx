@@ -256,7 +256,7 @@ export default function ControlPartido() {
     <div className="flex flex-col">
       {/* Logos y marcador */}
       <div className="flex flex-row items-center justify-center w-full mt-4 gap-2 md:gap-24">
-        <img src={`/img/escudos/${equipo1.logo}`} className="w-20 h-20 md:w-40 md:h-40 object-contain" />
+        <img src={`${import.meta.env.BASE_URL}img/escudos/${equipo1.logo}`} className="w-20 h-20 md:w-40 md:h-40 object-contain" />
         <div className="flex flex-col items-center justify-center flex-shrink">
           <span className="font-extrabold text-yellow-400 text-7xl md:text-[7.5rem] leading-none drop-shadow-xl select-none">
             {goles.equipo1} <span className="text-white">-</span> {goles.equipo2}
@@ -268,8 +268,9 @@ export default function ControlPartido() {
             <button onClick={cronometro.reiniciar} className="bg-blue-600 text-white text-2xl md:text-3xl px-5 py-2 rounded-full">🔁</button>
           </div>
         </div>
-        <img src={`/img/escudos/${equipo2.logo}`} className="w-20 h-20 md:w-40 md:h-40 object-contain" />
+        <img src={`${import.meta.env.BASE_URL}img/escudos/${equipo2.logo}`} className="w-20 h-20 md:w-40 md:h-40 object-contain" />
       </div>
+
       {/* Goles abajo del marcador, dos columnas */}
       <div className="w-full flex flex-row items-start justify-center mt-2 gap-6">
         <div className="flex-1">
@@ -296,9 +297,10 @@ export default function ControlPartido() {
         {/* Equipo 1 */}
         <div className="w-full md:w-1/2 flex flex-row items-start justify-center">
           <div className="relative w-[60vw] max-w-[340px] h-[220px] md:w-[300px] md:h-[400px]">
-            <img src="/img/cancha-vertical.svg" alt="cancha local" className="w-full h-full" />
+            <img src={`${import.meta.env.BASE_URL}img/cancha-vertical.svg`} alt="cancha local" className="w-full h-full" />
             {(equipo1.jugadores || []).map((jug, i) => renderJugador(jug, i, equipo1))}
           </div>
+
           {/* Controles a la DERECHA */}
           <div className="flex flex-col items-center gap-3 ml-3 mt-0 md:mt-8 w-36">
             <button onClick={() => registrarGol("equipo1")} className="bg-green-500 w-full py-3 rounded-full font-bold text-lg">Gol</button>
@@ -332,9 +334,10 @@ export default function ControlPartido() {
         {/* Equipo 2 */}
         <div className="w-full md:w-1/2 flex flex-row-reverse items-start justify-center">
           <div className="relative w-[60vw] max-w-[340px] h-[220px] md:w-[300px] md:h-[400px]">
-            <img src="/img/cancha-vertical.svg" alt="cancha visita" className="w-full h-full" />
+            <img src={`${import.meta.env.BASE_URL}img/cancha-vertical.svg`} alt="cancha visita" className="w-full h-full" />
             {(equipo2.jugadores || []).map((jug, i) => renderJugador(jug, i, equipo2))}
           </div>
+
           {/* Controles a la IZQUIERDA */}
           <div className="flex flex-col items-center gap-3 mr-3 mt-0 md:mt-8 w-36">
             <button onClick={() => registrarGol("equipo2")} className="bg-green-500 w-full py-3 rounded-full font-bold text-lg">Gol</button>
@@ -383,7 +386,7 @@ export default function ControlPartido() {
     <div className="flex flex-col items-center">
       {/* Logos y marcador */}
       <div className="flex flex-row items-center justify-center w-full mt-4 gap-3">
-        <img src={`/img/escudos/${equipo1.logo}`} className="w-16 h-16 object-contain" />
+        <img src={`${import.meta.env.BASE_URL}img/escudos/${equipo1.logo}`} className="w-16 h-16 object-contain" />
         <div className="flex flex-col items-center justify-center">
           <span className="font-extrabold text-yellow-400 text-5xl leading-none drop-shadow-xl select-none">
             {goles.equipo1} <span className="text-white">-</span> {goles.equipo2}
@@ -395,8 +398,9 @@ export default function ControlPartido() {
             <button onClick={cronometro.reiniciar} className="bg-blue-600 text-white text-xl px-3 py-1 rounded-full">🔁</button>
           </div>
         </div>
-        <img src={`/img/escudos/${equipo2.logo}`} className="w-16 h-16 object-contain" />
+        <img src={`${import.meta.env.BASE_URL}img/escudos/${equipo2.logo}`} className="w-16 h-16 object-contain" />
       </div>
+
       {/* Goles: dos columnas */}
       <div className="flex flex-row w-full max-w-lg mt-3 gap-2">
         <div className="flex-1">

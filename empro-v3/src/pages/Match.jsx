@@ -6,21 +6,22 @@ import { database } from "../firebase";
 
 // Equipos por género
 const equiposMasculino = [
-  { nombre: "Atrapados", escudo: "/img/escudos/atrapados.png" },
-  { nombre: "Bosco", escudo: "/img/escudos/bosco.png" },
-  { nombre: "Emprosaurios", escudo: "/img/escudos/emprosaurios.png" },
-  { nombre: "Huellas", escudo: "/img/escudos/huellas.png" },
-  { nombre: "Luz", escudo: "/img/escudos/luz.png" },
-  { nombre: "Mensajeros", escudo: "/img/escudos/mensajeros.png" },
+  { nombre: "Atrapados", escudo: `${import.meta.env.BASE_URL}img/escudos/atrapados.png` },
+  { nombre: "Bosco", escudo: `${import.meta.env.BASE_URL}img/escudos/bosco.png` },
+  { nombre: "Emprosaurios", escudo: `${import.meta.env.BASE_URL}img/escudos/emprosaurios.png` },
+  { nombre: "Huellas", escudo: `${import.meta.env.BASE_URL}img/escudos/huellas.png` },
+  { nombre: "Luz", escudo: `${import.meta.env.BASE_URL}img/escudos/luz.png` },
+  { nombre: "Mensajeros", escudo: `${import.meta.env.BASE_URL}img/escudos/mensajeros.png` },
 ];
 
 const equiposFemenino = [
-  { nombre: "Atrapados", escudo: "/img/escudos/atrapados.png" },
-  { nombre: "Bosco", escudo: "/img/escudos/bosco.png" },
-  { nombre: "Huellas", escudo: "/img/escudos/huellas.png" },
-  { nombre: "Luz", escudo: "/img/escudos/luz.png" },
-  { nombre: "Mensajeros", escudo: "/img/escudos/mensajeros.png" },
+  { nombre: "Atrapados", escudo: `${import.meta.env.BASE_URL}img/escudos/atrapados.png` },
+  { nombre: "Bosco", escudo: `${import.meta.env.BASE_URL}img/escudos/bosco.png` },
+  { nombre: "Huellas", escudo: `${import.meta.env.BASE_URL}img/escudos/huellas.png` },
+  { nombre: "Luz", escudo: `${import.meta.env.BASE_URL}img/escudos/luz.png` },
+  { nombre: "Mensajeros", escudo: `${import.meta.env.BASE_URL}img/escudos/mensajeros.png` },
 ];
+
 
 export default function Match() {
   const [genero, setGenero] = useState("masculino");

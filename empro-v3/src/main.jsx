@@ -5,6 +5,11 @@ import { AuthProvider } from "./context/AuthContext";
 import App from "./App";
 import "./index.css";
 
+const redirectPath = window.location.search?.substring(1);
+if (redirectPath) {
+  window.history.replaceState(null, '', redirectPath);
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <AuthProvider>

@@ -25,12 +25,13 @@ export default function Main() {
   return (
     <div
       className="min-h-screen bg-cover bg-center text-white font-qatar"
-      style={{ backgroundImage: "url('/img/fondoempro-horizontal.png')" }}
+      style={{ backgroundImage: `url('${import.meta.env.BASE_URL}img/fondoempro-horizontal.png')` }}
     >
+
       <Navbar />
 
       <div className="text-center py-6">
-        <img src="/img/logo2.png" alt="Tabla de Posiciones" className="mx-auto w-auto mb-4 px-8" />
+        <img src={`${import.meta.env.BASE_URL}img/logo2.png`} alt="Tabla de Posiciones" className="mx-auto w-auto mb-4 px-8" />
         <button
           onClick={() => setGenero(genero === "masculino" ? "femenino" : "masculino")}
           className="bg-yellow-400 text-[#7a0026] font-bold px-6 py-2 rounded-full"
@@ -59,10 +60,11 @@ export default function Main() {
               <tr key={i} className="bg-white text-black border-b">
                 <td className="flex items-center gap-2 font-bold sticky left-0 bg-white px-2 py-2">
                   <img
-                    src={`/img/escudos/${equipo.logo}`}
+                    src={`${import.meta.env.BASE_URL}img/escudos/${equipo.logo}`}
                     alt={equipo.nombre}
                     className="w-4 h-4 object-contain mx-1"
                   />
+
                   {equipo.nombre}
                 </td>
                 <td>{equipo.pj || 0}</td>

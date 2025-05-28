@@ -21,10 +21,11 @@ export default function HeaderPartido({
       <div className="flex justify-between items-center w-full max-w-6xl px-4">
         {/* Logo equipo 1 */}
         <img
-          src={`/img/escudos/${equipo1.logo}`}
+          src={`${import.meta.env.BASE_URL}img/escudos/${equipo1.logo}`}
           alt={equipo1.nombre}
           className="w-24 h-24 md:w-32 md:h-32 rounded-xl object-contain"
         />
+
 
         {/* Marcador + Tiempo */}
         <div className="text-center">
@@ -41,10 +42,11 @@ export default function HeaderPartido({
 
         {/* Logo equipo 2 */}
         <img
-          src={`/img/escudos/${equipo2.logo}`}
+          src={`${import.meta.env.BASE_URL}img/escudos/${equipo2.logo}`}
           alt={equipo2.nombre}
           className="w-24 h-24 md:w-32 md:h-32 rounded-xl object-contain"
         />
+
       </div>
     </div>
   );

@@ -204,8 +204,9 @@ export default function Alineacion() {
   return (
     <div
       className="min-h-screen bg-cover bg-center font-qatar text-white"
-      style={{ backgroundImage: "url('/img/fondoempro-horizontal.png')" }}
+      style={{ backgroundImage: `url('${import.meta.env.BASE_URL}img/fondoempro-horizontal.png')` }}
     >
+
       <Navbar />
 
       <h1 className="text-3xl sm:text-5xl font-bold text-center mt-6 text-yellow-400 drop-shadow">
@@ -214,9 +215,10 @@ export default function Alineacion() {
 
       <div className="flex flex-col lg:flex-row items-center justify-center gap-8 p-4 lg:p-6">
         <div className="relative w-[320px] h-[540px] md:w-[400px] md:h-[640px]">
-          <img src="/img/cancha-vertical.svg" alt="cancha local" className="w-full h-full" />
+          <img src={`${import.meta.env.BASE_URL}img/cancha-vertical.svg`} alt="cancha local" className="w-full h-full" />
           {jugadoresLocal.map((jug, i) => renderJugador(jug, i, "local", getCamiseta(equipoLocal.nombre)))}
         </div>
+
 
         <div className="flex flex-col items-center gap-6">
           <img src="/img/logo-empro.png" alt="logo empro" className="w-24 md:w-32" />
@@ -234,9 +236,10 @@ export default function Alineacion() {
         </div>
 
         <div className="relative w-[320px] h-[540px] md:w-[400px] md:h-[640px]">
-          <img src="/img/cancha-vertical.svg" alt="cancha visita" className="w-full h-full" />
+          <img src={`${import.meta.env.BASE_URL}img/cancha-vertical.svg`} alt="cancha visita" className="w-full h-full" />
           {jugadoresVisita.map((jug, i) => renderJugador(jug, i, "visita", getCamiseta(equipoVisita.nombre)))}
         </div>
+
       </div>
 
       <div className="flex justify-center mt-6 pb-10">

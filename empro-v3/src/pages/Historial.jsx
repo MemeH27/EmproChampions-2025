@@ -30,10 +30,10 @@ export default function Historial() {
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center text-white font-qatar" style={{ backgroundImage: "url('/img/fondoempro-horizontal.png')" }}>
+    <div className="min-h-screen bg-cover bg-center text-white font-qatar" style={{ backgroundImage: `url('${import.meta.env.BASE_URL}img/fondoempro-horizontal.png')` }}>
       <Navbar />
       <div className="text-center py-6">
-        <img src="/img/logo4.png" alt="Historial de Partidos" className="mx-auto w-auto px-8 mb-4" />
+        <img src={`${import.meta.env.BASE_URL}img/logo4.png`} alt="Historial de Partidos" className="mx-auto w-auto px-8 mb-4" />
         <button
           onClick={() => setGenero(genero === "masculino" ? "femenino" : "masculino")}
           className="bg-yellow-400 text-[#7a0026] font-bold px-6 py-2 rounded-full"

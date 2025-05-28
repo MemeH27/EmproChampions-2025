@@ -24,10 +24,11 @@ export default function ModalMVP({ equipoGanador, jugadoresParticipantes, onClos
       <div className="bg-white text-black rounded-xl p-6 w-full max-w-2xl shadow-xl">
         <div className="text-center mb-6">
           <img
-            src={`/img/${equipoGanador.logo}`}
+            src={`${import.meta.env.BASE_URL}img/${equipoGanador.logo}`}
             alt="Ganador"
             className="w-28 h-28 mx-auto mb-2"
           />
+
           <h2 className="text-2xl font-bold">Selecciona el MVP del Partido</h2>
           <p className="text-sm text-gray-600">(Incluye titulares y suplentes que jugaron)</p>
         </div>
@@ -39,11 +40,10 @@ export default function ModalMVP({ equipoGanador, jugadoresParticipantes, onClos
               <div
                 key={index}
                 onClick={() => setJugadorMVP(jug)}
-                className={`cursor-pointer border-2 rounded-lg p-3 text-center hover:border-yellow-500 transition ${
-                  jugadorMVP?.nombre === jug.nombre
+                className={`cursor-pointer border-2 rounded-lg p-3 text-center hover:border-yellow-500 transition ${jugadorMVP?.nombre === jug.nombre
                     ? "border-yellow-500 bg-yellow-100"
                     : "border-gray-300"
-                }`}
+                  }`}
               >
                 <p className="text-lg font-bold text-gray-800">#{jug.dorsal}</p>
                 <p className="text-sm text-gray-700">{jug.nombre}</p>

@@ -45,10 +45,10 @@ export default function Goleadores() {
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center text-white font-qatar" style={{ backgroundImage: "url('/img/fondoempro-horizontal.png')" }}>
+    <div className="min-h-screen bg-cover bg-center text-white font-qatar" style={{ backgroundImage: `url('${import.meta.env.BASE_URL}img/fondoempro-horizontal.png')` }}>
       <Navbar />
       <div className="text-center py-6">
-        <img src="/img/logo3.png" alt="Máximos Goleadores" className="mx-auto w-auto px-8 mb-4" />
+        <img src={`${import.meta.env.BASE_URL}img/logo3.png`} alt="Máximos Goleadores" className="mx-auto w-auto px-8 mb-4" />
         <button
           onClick={() => setGenero(genero === "masculino" ? "femenino" : "masculino")}
           className="bg-yellow-400 text-[#7a0026] font-bold px-6 py-2 rounded-full"
@@ -66,9 +66,10 @@ export default function Goleadores() {
               <li key={i} className="bg-white text-black rounded-lg shadow px-4 py-3">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
-                    <img src={`/img/escudos/${g.logo}`} alt={g.equipo} className="w-6 h-6" />
+                    <img src={`${import.meta.env.BASE_URL}img/escudos/${g.logo}`} alt={g.equipo} className="w-6 h-6" />
                     <span className="font-bold">{g.jugador} ({g.equipo})</span>
                   </div>
+
                   <div className="flex gap-3 items-center">
                     <span className="text-lg font-extrabold text-[#7a0026]">{g.goles} ⚽</span>
                     <button

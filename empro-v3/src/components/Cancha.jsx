@@ -5,8 +5,9 @@ export default function Cancha({ equipo1, equipo2 }) {
     <div className="flex justify-center mt-6 px-4">
       <div
         className="w-full max-w-5xl h-[500px] bg-no-repeat bg-contain bg-center flex justify-between px-2"
-        style={{ backgroundImage: "url('/img/cancha-vertical.svg')" }}
+        style={{ backgroundImage: `url('${import.meta.env.BASE_URL}img/cancha-vertical.svg')` }}
       >
+
         {/* Lado izquierdo - equipo 1 */}
         <div className="w-1/2 flex flex-col items-center justify-around">
           {equipo1.jugadores
