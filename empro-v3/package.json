@@ -1,14 +1,13 @@
 {
-  "name": "empro-v3",
-  "version": "0.0.1",
+  "name": "EmproChampions-2025",
+  "version": "0.0.2",
   "private": true,
-  "homepage": "https://memeH27.github.io/EmproChampions-2025",
+  "homepage": "https://memeh27.github.io/EmproChampions-2025",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && copy 404.html dist\\404.html",
     "preview": "vite preview",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

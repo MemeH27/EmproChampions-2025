@@ -1,9 +1,7 @@
-// ✅ Registro.jsx actualizado sin campo de foto, se usará en Configuración después
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, database } from "../firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { ref, set } from "firebase/database";
 
 export default function Registro() {
@@ -31,13 +29,23 @@ export default function Registro() {
         correo: email,
         rol: "usuario",
         iniciales: generarIniciales(nombre, apellido),
-        foto: null, // se podrá modificar luego desde configuración
+        foto: null,
       };
 
       await set(ref(database, `usuarios/${uid}`), usuarioData);
+
+      // ✅ Enviar correo de verificación
+      await sendEmailVerification(result.user);
+      alert("Cuenta creada. Se ha enviado un correo de verificación.");
+
       navigate("/login");
+
     } catch (error) {
-      alert("Error al crear la cuenta: " + error.message);
+      if (error.code === "auth/email-already-in-use") {
+        alert("Este correo ya está registrado.");
+      } else {
+        alert("Error al crear la cuenta: " + error.message);
+      }
     }
   };
 
@@ -47,7 +55,6 @@ export default function Registro() {
         <img src={`${import.meta.env.BASE_URL}img/logo-empro.png`} alt="Logo Empro" className="w-24 mx-auto mb-4" />
         <h1 className="text-3xl font-bold text-[#7a0026] mb-6">Crear Cuenta</h1>
         <form onSubmit={registrarUsuario} className="space-y-4">
-
           <input
             type="text"
             placeholder="Nombre"

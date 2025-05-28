@@ -5,14 +5,15 @@ import { AuthProvider } from "./context/AuthContext";
 import App from "./App";
 import "./index.css";
 
+// redirección si venís desde 404
 if (sessionStorage.redirect) {
   const redirectPath = sessionStorage.redirect;
   delete sessionStorage.redirect;
-  window.history.replaceState(null, "", redirectPath);
+  window.history.replaceState(null, '', redirectPath);
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <BrowserRouter>
+  <BrowserRouter basename="/EmproChampions-2025">
     <AuthProvider>
       <App />
     </AuthProvider>

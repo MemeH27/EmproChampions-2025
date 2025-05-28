@@ -1,3 +1,15 @@
-<script>
-  location.replace("/EmproChampions-2025" + location.pathname);
-</script>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirigiendo...</title>
+    <script>
+      sessionStorage.redirect = location.pathname + location.search;
+      window.location.href = "/EmproChampions-2025/";
+    </script>
+  </head>
+  <body>
+    <p>Redirigiendo a la app...</p>
+  </body>
+</html>
+

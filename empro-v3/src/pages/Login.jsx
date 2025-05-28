@@ -1,7 +1,7 @@
 // ✅ Login.jsx actualizado para verificar correo de admin desde Firebase y asignar rol dinámico
 
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { auth, provider, database } from "../firebase";
 import { signInWithPopup, signInWithEmailAndPassword } from "firebase/auth";
 import { ref, set, get } from "firebase/database";
@@ -21,14 +21,23 @@ export default function Login() {
 
     let rol = "usuario";
 
+    // Correos autorizados como admin por defecto
+    const correosAdmin = [
+      "yayirobe2305@gmail.com",
+      "gersonespino@gmail.com",
+      "andiescobar8@gmail.com",
+      "rodriguezmerary42@gmail.com"
+    ];
+
     if (adminSnap.exists()) {
       rol = "admin";
-    } else if (user.email === "yayirobe2305@gmail.com") {
-      // Agregar automáticamente a la lista de admins en Firebase si es el correo del creador
+    } else if (correosAdmin.includes(user.email)) {
+      // Agregar automáticamente a la lista de admins si el correo está en la lista
       const nuevoAdminRef = ref(database, `admins/${correoFormateado}`);
       await set(nuevoAdminRef, true);
       rol = "admin";
     }
+
 
     if (!snapshot.exists()) {
       await set(usuarioRef, {
@@ -44,7 +53,14 @@ export default function Login() {
     e.preventDefault();
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
+
+      if (!result.user.emailVerified) {
+        alert("Por favor verifica tu correo antes de iniciar sesión.");
+        return;
+      }
+
       await asignarRolEnFirebase(result.user);
+
     } catch (error) {
       alert("Correo o contraseña incorrectos");
     }
@@ -53,6 +69,14 @@ export default function Login() {
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
+      if (!result.user.emailVerified) {
+        await result.user.reload(); // actualiza estado
+        if (!result.user.emailVerified) {
+          await sendEmailVerification(result.user);
+          alert("Te hemos enviado un correo de verificación. Verifícalo para completar el acceso.");
+        }
+      }
+
       await asignarRolEnFirebase(result.user);
     } catch (error) {
       alert("Error al iniciar con Google");
@@ -103,8 +127,12 @@ export default function Login() {
           INGRESA CON GOOGLE
         </button>
         <p className="mt-4 text-sm text-[#7a0026]">
-          ¿No tienes cuenta? <a href="#" className="font-bold underline">Crea una</a>
+          ¿No tienes cuenta?{" "}
+          <Link to="/registro" className="font-bold underline">
+            Crea una
+          </Link>
         </p>
+
       </div>
     </div>
   );
