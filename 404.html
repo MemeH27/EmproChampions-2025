@@ -2,14 +2,14 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Redirecting...</title>
-    <script type="text/javascript">
-      // Redirige cualquier 404 a index.html preservando la ruta original
-      sessionStorage.redirect = location.pathname;
-      window.location.href = "/";
+    <title>Redirigiendo...</title>
+    <script>
+      sessionStorage.redirect = location.pathname + location.search;
+      window.location.href = "/EmproChampions-2025/";
     </script>
   </head>
   <body>
-    <p>Redirigiendo...</p>
+    <p>Redirigiendo a la app...</p>
   </body>
 </html>
+
