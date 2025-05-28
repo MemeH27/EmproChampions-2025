@@ -2,7 +2,7 @@
   "name": "empro-v3",
   "version": "0.0.1",
   "private": true,
-  "homepage": "https://MemeH27.github.io/EmproChampions-2025",
+  "homepage": "https://memeH27.github.io/EmproChampions-2025",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

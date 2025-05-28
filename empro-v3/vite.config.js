@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  base: '/EmproChampions-2025/',
   plugins: [react()],
-})
+  base: '/EmproChampions-2025/', // <- Asegurate de poner el nombre del repo aquí
+});
