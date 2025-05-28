@@ -5,9 +5,10 @@ import { AuthProvider } from "./context/AuthContext";
 import App from "./App";
 import "./index.css";
 
-const redirectPath = window.location.search?.substring(1);
-if (redirectPath) {
-  window.history.replaceState(null, '', redirectPath);
+if (sessionStorage.redirect) {
+  const redirectPath = sessionStorage.redirect;
+  delete sessionStorage.redirect;
+  window.history.replaceState(null, "", redirectPath);
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
