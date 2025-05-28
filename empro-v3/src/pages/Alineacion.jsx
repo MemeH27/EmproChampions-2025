@@ -144,8 +144,9 @@ export default function Alineacion() {
 
   const getCamiseta = (nombre) => {
     const id = nombre.toLowerCase().replace(/\s+/g, "-");
-    return `/camisas/camisa-${id}.png`;
+    return `${import.meta.env.BASE_URL}camisas/camisa-${id}.png`;
   };
+
 
   const getColorDorsal = (nombre) => {
     const negros = ["don bosco", "luz", "emprosaurios"];

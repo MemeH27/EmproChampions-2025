@@ -65,7 +65,7 @@ export default function Match() {
   return (
     <div
       className="min-h-screen bg-cover bg-center font-qatar text-white flex flex-col"
-      style={{ backgroundImage: "url('/img/fondoempro-horizontal.png')" }}
+      style={{ backgroundImage: `url('${import.meta.env.BASE_URL}img/fondoempro-horizontal.png')` }}
     >
       <Navbar />
 
@@ -78,8 +78,8 @@ export default function Match() {
             setIndexVisita(1);
           }}
           className={`px-4 py-2 font-bold rounded-full border-2 ${genero === "masculino"
-              ? "bg-[#FFD700] text-[#7a0026] border-yellow-400"
-              : "bg-transparent border-white text-white"
+            ? "bg-[#FFD700] text-[#7a0026] border-yellow-400"
+            : "bg-transparent border-white text-white"
             } transition`}
         >
           Masculino
@@ -91,8 +91,8 @@ export default function Match() {
             setIndexVisita(1);
           }}
           className={`px-4 py-2 font-bold rounded-full border-2 ${genero === "femenino"
-              ? "bg-[#FFD700] text-[#7a0026] border-yellow-400"
-              : "bg-transparent border-white text-white"
+            ? "bg-[#FFD700] text-[#7a0026] border-yellow-400"
+            : "bg-transparent border-white text-white"
             } transition`}
         >
           Femenino

@@ -193,8 +193,9 @@ export default function ControlPartido() {
 
   const getCamiseta = (nombre) => {
     const id = nombre.toLowerCase().replace(/\s+/g, "-");
-    return `/camisas/camisa-${id}.png`;
+    return `${import.meta.env.BASE_URL}camisas/camisa-${id}.png`;
   };
+
   const getColorDorsal = (nombre) => {
     const negros = ["don bosco", "luz", "emprosaurios"];
     return negros.includes(nombre?.toLowerCase()) ? "#000" : "#fff";

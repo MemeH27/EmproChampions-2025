@@ -64,7 +64,11 @@ export default function Login() {
       backgroundImage: `url('${import.meta.env.BASE_URL}img/fondoempro-horizontal.png')`
     }}>
       <div className="bg-white/90 rounded-2xl shadow-lg p-8 w-full max-w-md text-center">
-        <img src={`${import.meta.env.BASE_URL}img/logo-empro.png`} alt="Logo Empro" />
+        <img
+          src={`${import.meta.env.BASE_URL}img/logo-empro.png`}
+          alt="Logo Empro"
+          className="w-32 md:w-40 mx-auto mb-4"
+        />
         <h1 className="text-3xl font-bold text-[#7a0026] mb-6">Empro Champions 2025</h1>
         <form onSubmit={handleLogin} className="space-y-4">
           <h2 className="text-lg text-[#7a0026] font-bold">¡HOLA, INICIA SESIÓN!</h2>

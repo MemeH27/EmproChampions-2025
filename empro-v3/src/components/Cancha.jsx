@@ -15,10 +15,11 @@ export default function Cancha({ equipo1, equipo2 }) {
             .map((jugador, i) => (
               <div key={i} className="relative text-center">
                 <img
-                  src={`/camisas/${equipo1.camisa}`}
+                  src={`${import.meta.env.BASE_URL}camisas/${equipo1.camisa}`}
                   alt="camisa"
                   className="w-14 mx-auto"
                 />
+
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white font-bold text-sm drop-shadow">
                   {jugador.dorsal}
                 </div>
@@ -34,10 +35,11 @@ export default function Cancha({ equipo1, equipo2 }) {
             .map((jugador, i) => (
               <div key={i} className="relative text-center">
                 <img
-                  src={`/camisas/${equipo2.camisa}`}
+                  src={`${import.meta.env.BASE_URL}camisas/${equipo2.camisa}`}
                   alt="camisa"
                   className="w-14 mx-auto"
                 />
+
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white font-bold text-sm drop-shadow">
                   {jugador.dorsal}
                 </div>
