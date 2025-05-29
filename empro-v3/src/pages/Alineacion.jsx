@@ -1,4 +1,3 @@
-// src/pages/Alineacion.jsx
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import ModalJugador from "../components/ModalJugador";
@@ -8,42 +7,43 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ref, push, set, get } from "firebase/database";
 import { database } from "../firebase";
 
+// Importar los datos de jugadores separados por género o una estructura que permita filtrarlos
+// Por simplicidad, aquí se hardcodea si no tienes un sistema de base de datos para esto aún.
+import jugadoresData from "../data/jugadores.json";
+
 export default function Alineacion() {
   const navigate = useNavigate();
   const [equipoLocal, setEquipoLocal] = useState(null);
   const [equipoVisita, setEquipoVisita] = useState(null);
-  const [genero, setGenero] = useState("masculino");
+  const [genero, setGenero] = useState("masculino"); // 'masculino' o 'femenino'
   const [jugadoresLocal, setJugadoresLocal] = useState(Array(6).fill({ nombre: "", dorsal: "" }));
   const [jugadoresVisita, setJugadoresVisita] = useState(Array(6).fill({ nombre: "", dorsal: "" }));
   const [modalData, setModalData] = useState(null);
 
-  // Aquí deberías tener los equipos seleccionados en Firebase (por usuario, por sesión, como gustes)
   useEffect(() => {
-    // Supón que tienes los equipos seleccionados en un nodo temporal en Firebase bajo /selecciones/{usuarioId}
-    // Cambia esto por tu flujo real. Si no hay nada, redirige a selección de equipos
-    async function cargarEquipos() {
-      // Por ahora, usa nodos temporales para DEMO
-      // Reemplaza con lógica real si lo prefieres (o pásalos por props/contexto)
+    async function cargarEquiposYGenero() {
       const snapLocal = await get(ref(database, `selecciones/equipoLocal`));
       const snapVisita = await get(ref(database, `selecciones/equipoVisita`));
       const snapGenero = await get(ref(database, `selecciones/generoPartido`));
 
-      if (snapLocal.exists() && snapVisita.exists()) {
+      if (snapLocal.exists() && snapVisita.exists() && snapGenero.exists()) {
         setEquipoLocal(snapLocal.val());
         setEquipoVisita(snapVisita.val());
-        setGenero(snapGenero.exists() ? snapGenero.val() : "masculino");
+        setGenero(snapGenero.val());
       } else {
-        navigate("/match"); // Redirige a selección si no están seleccionados
+        navigate("/match");
       }
     }
-    cargarEquipos();
+    cargarEquiposYGenero();
   }, [navigate]);
 
   const abrirModal = (index, tipo) => {
     const jugador = tipo === "local" ? jugadoresLocal[index] : jugadoresVisita[index];
     const jugadoresActuales = tipo === "local" ? jugadoresLocal : jugadoresVisita;
     const nombreEquipo = tipo === "local" ? equipoLocal?.nombre : equipoVisita?.nombre;
-    setModalData({ tipo, index, jugador, jugadoresActuales, nombreEquipo });
+    
+    // Pasar el género actual para que ModalJugador cargue la lista correcta
+    setModalData({ tipo, index, jugador, jugadoresActuales, nombreEquipo, generoPartido: genero });
   };
 
   const guardarJugador = (index, tipo, datos) => {
@@ -72,24 +72,36 @@ export default function Alineacion() {
         return;
       }
 
-      // Crea el partido en Firebase
       const partidosRef = ref(database, "partidos");
       const nuevoPartidoRef = push(partidosRef);
       partidoId = nuevoPartidoRef.key;
 
-      // Trae todos los jugadores (para suplentes)
+      // Cargar TODOS los jugadores del equipo según el género desde Firebase o JSON
+      // Asumiendo que ahora tu estructura en Firebase para plantillas es algo como:
+      // /plantillas/masculino/atrapados [...]
+      // /plantillas/femenino/bosco [...]
+
       let todosJugadoresLocal = [];
       let todosJugadoresVisita = [];
+
       try {
-        const snap1 = await get(ref(database, `plantillas/${equipoLocal.nombre.toLowerCase()}`));
-        const snap2 = await get(ref(database, `plantillas/${equipoVisita.nombre.toLowerCase()}`));
-        if (snap1.exists()) todosJugadoresLocal = snap1.val();
-        if (snap2.exists()) todosJugadoresVisita = snap2.val();
+        const snapLocalPlantilla = await get(ref(database, `plantillas/${genero.toLowerCase()}/${equipoLocal.nombre.toLowerCase()}`));
+        const snapVisitaPlantilla = await get(ref(database, `plantillas/${genero.toLowerCase()}/${equipoVisita.nombre.toLowerCase()}`));
+
+        if (snapLocalPlantilla.exists()) todosJugadoresLocal = snapLocalPlantilla.val();
+        else todosJugadoresLocal = jugadoresData[equipoLocal.nombre.toLowerCase()] || []; // Fallback a JSON local si no está en Firebase
+
+        if (snapVisitaPlantilla.exists()) todosJugadoresVisita = snapVisitaPlantilla.val();
+        else todosJugadoresVisita = jugadoresData[equipoVisita.nombre.toLowerCase()] || []; // Fallback a JSON local
       } catch (e) {
-        console.error("Error cargando plantillas de suplentes:", e);
+        console.error("Error cargando plantillas de suplentes (Alineacion.jsx):", e);
+        // Si hay error en Firebase, intentar cargar desde JSON local como fallback
+        todosJugadoresLocal = jugadoresData[equipoLocal.nombre.toLowerCase()] || [];
+        todosJugadoresVisita = jugadoresData[equipoVisita.nombre.toLowerCase()] || [];
       }
 
-      const equipo1 = {
+
+      const equipo1Data = {
         nombre: equipoLocal.nombre,
         logo: equipoLocal.escudo.split("/").pop(),
         camisa: `camisa-${equipoLocal.nombre.toLowerCase().replace(/\s+/g, "-")}.png`,
@@ -98,10 +110,11 @@ export default function Alineacion() {
           enJuego: true,
           haJugado: true,
         })),
-        todosJugadores: todosJugadoresLocal
+        todosJugadores: todosJugadoresLocal,
+        genero: genero // Asegura que el género también se guarde en los datos del equipo
       };
 
-      const equipo2 = {
+      const equipo2Data = {
         nombre: equipoVisita.nombre,
         logo: equipoVisita.escudo.split("/").pop(),
         camisa: `camisa-${equipoVisita.nombre.toLowerCase().replace(/\s+/g, "-")}.png`,
@@ -110,16 +123,16 @@ export default function Alineacion() {
           enJuego: true,
           haJugado: true,
         })),
-        todosJugadores: todosJugadoresVisita
+        todosJugadores: todosJugadoresVisita,
+        genero: genero // Asegura que el género también se guarde en los datos del equipo
       };
 
-      console.log("Guardando alineación", { equipo1, equipo2, genero, partidoId });
+      console.log("Guardando alineación", { equipo1: equipo1Data, equipo2: equipo2Data, genero, partidoId });
 
-      // Guarda la alineación y estado inicial del partido en Firebase
       await set(ref(database, `partidos/${partidoId}/alineacion`), {
-        equipo1,
-        equipo2,
-        genero,
+        equipo1: equipo1Data,
+        equipo2: equipo2Data,
+        genero: genero, // Guarda el género a nivel de partido también
       });
 
       await set(ref(database, `partidos/${partidoId}/marcador`), {
@@ -127,26 +140,22 @@ export default function Alineacion() {
         equipo2: 0
       });
 
-      // Si todo sale bien, navega normalmente
       console.log("🚀 Navegando a control (OK)", partidoId);
       navigate(`/control/${partidoId}`);
 
     } catch (error) {
       alert("❌ ERROR al confirmar alineación: " + error.message);
       console.error("Error al confirmar alineación:", error);
-      // 🚨 Forzar navegación aunque haya error (sólo para pruebas)
       const idFallback = partidoId || "debug-fallback";
       console.log("⚠️ Forzando navegación a control:", idFallback);
       navigate(`/control/${idFallback}`);
     }
   };
 
-
   const getCamiseta = (nombre) => {
     const id = nombre.toLowerCase().replace(/\s+/g, "-");
     return `${import.meta.env.BASE_URL}camisas/camisa-${id}.png`;
   };
-
 
   const getColorDorsal = (nombre) => {
     const negros = ["don bosco", "luz", "emprosaurios"];
@@ -264,6 +273,7 @@ export default function Alineacion() {
             dorsalColor={getColorDorsal((modalData.tipo === "local" ? equipoLocal.nombre : equipoVisita.nombre))}
             jugadoresActuales={modalData.jugadoresActuales}
             nombreEquipo={modalData.nombreEquipo}
+            generoPartido={modalData.generoPartido} // Pasa el género al modal del jugador
           />
         )}
       </AnimatePresence>

@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { ref, get } from "firebase/database";
+import { ref, get, onValue } from "firebase/database"; // Importa 'onValue'
 import { auth, database } from "../firebase";
 
 export const AuthContext = createContext();
@@ -11,33 +11,53 @@ export function AuthProvider({ children }) {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let unsubscribeAuth;
+    let unsubscribeRole;
+
+    unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       console.log("🔥 [AuthContext] onAuthStateChanged - user:", user);
       if (user) {
         setUsuario(user);
 
-        try {
-          const refUsuario = ref(database, `usuarios/${user.uid}`);
-          const snap = await get(refUsuario);
-          if (snap.exists()) {
-            const data = snap.val();
-            setRol(data.rol || "usuario");
-          } else {
-            setRol("usuario");
-          }
-        } catch (err) {
-          setRol("usuario");
+        if (unsubscribeRole) {
+          unsubscribeRole();
         }
 
-        setCargando(false);
+        const userRoleRef = ref(database, `usuarios/${user.uid}/rol`);
+        unsubscribeRole = onValue(userRoleRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const userRole = snapshot.val();
+            setRol(userRole || "usuario");
+            console.log("Rol del usuario cargado desde DB:", userRole || "usuario");
+          } else {
+            setRol("usuario");
+            console.log("Nodo de usuario o rol no encontrado, rol por defecto: usuario");
+          }
+          setCargando(false);
+        }, (error) => {
+          console.error("Error al leer el rol desde la base de datos:", error);
+          setRol("usuario");
+          setCargando(false);
+        });
+
       } else {
+        if (unsubscribeRole) {
+          unsubscribeRole();
+        }
         setUsuario(null);
         setRol(null);
         setCargando(false);
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      if (unsubscribeAuth) {
+        unsubscribeAuth();
+      }
+      if (unsubscribeRole) {
+        unsubscribeRole();
+      }
+    };
   }, []);
 
   return (

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { auth, database } from "../firebase";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { ref, set } from "firebase/database";
@@ -95,8 +95,12 @@ export default function Registro() {
           </button>
         </form>
         <p className="mt-4 text-sm text-[#7a0026]">
-          ¿Ya tienes cuenta? <a href="/login" className="font-bold underline">Inicia sesión</a>
+          ¿Ya tienes cuenta?{" "}
+          <Link to="/login" className="font-bold underline">
+            Inicia sesión
+          </Link>
         </p>
+
       </div>
     </div>
   );

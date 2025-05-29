@@ -13,6 +13,18 @@
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
+  <script type="module">
+    // Registrar el service worker de Firebase Messaging
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/EmproChampions-2025/firebase-messaging-sw.js')
+        .then((registration) => {
+          console.log('Service Worker registrado:', registration);
+        })
+        .catch((error) => {
+          console.error('Fallo el registro del Service Worker:', error);
+        });
+    }
+  </script>
 </body>
 
 </html>

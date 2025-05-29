@@ -1,5 +1,3 @@
-// ✅ Main.jsx — Tabla de posiciones con Firebase y diseño responsive
-
 import React, { useEffect, useState } from "react";
 import { ref, onValue } from "firebase/database";
 import { database } from "../firebase";
@@ -17,6 +15,8 @@ export default function Main() {
         const arreglo = Object.entries(data).map(([id, info]) => ({ id, ...info }));
         const ordenada = arreglo.sort((a, b) => b.puntos - a.puntos);
         setTabla(ordenada);
+      } else {
+        setTabla([]); // Limpiar la tabla si no hay datos
       }
     });
     return () => off();
@@ -41,46 +41,48 @@ export default function Main() {
       </div>
 
       <div className="overflow-x-auto px-4 pb-10">
-        <table className="min-w-[600px] w-full border-collapse text-center">
-          <thead>
-            <tr className="bg-[#FFD700] text-[#7a0026]">
-              <th className="px-4 py-2 sticky left-0 bg-[#FFD700]">Equipo</th>
-              <th>PJ</th>
-              <th>PG</th>
-              <th>PE</th>
-              <th>PP</th>
-              <th>GF</th>
-              <th>GC</th>
-              <th>+/-</th>
-              <th>Puntos</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tabla.map((equipo, i) => (
-              <tr key={i} className="bg-white text-black border-b">
-                <td className="flex items-center gap-2 font-bold sticky left-0 bg-white px-2 py-2">
-                  <img
-                    src={`${import.meta.env.BASE_URL}img/escudos/${equipo.logo}`}
-                    alt={equipo.nombre}
-                    className="w-4 h-4 object-contain mx-1"
-                  />
-
-                  {equipo.nombre}
-                </td>
-                <td>{equipo.pj || 0}</td>
-                <td>{equipo.pg || 0}</td>
-                <td>{equipo.pe || 0}</td>
-                <td>{equipo.pp || 0}</td>
-                <td>{equipo.gf || 0}</td>
-                <td>{equipo.gc || 0}</td>
-                <td>{(equipo.gf || 0) - (equipo.gc || 0)}</td>
-                <td className="font-extrabold text-[#7a0026]">{equipo.puntos || 0}</td>
+        {tabla.length === 0 ? (
+          <p className="text-center text-xl">No hay datos en la tabla de posiciones aún.</p>
+        ) : (
+          <table className="min-w-[600px] w-full border-collapse text-center">
+            <thead>
+              <tr className="bg-[#FFD700] text-[#7a0026]">
+                <th className="px-4 py-2 sticky left-0 bg-[#FFD700]">Equipo</th>
+                <th>PJ</th>
+                <th>PG</th>
+                <th>PE</th>
+                <th>PP</th>
+                <th>GF</th>
+                <th>GC</th>
+                <th>+/-</th>
+                <th>Puntos</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {tabla.map((equipo, i) => (
+                <tr key={equipo.id} className="bg-white text-black border-b">
+                  <td className="flex items-center gap-2 font-bold sticky left-0 bg-white px-2 py-2">
+                    <img
+                      src={`${import.meta.env.BASE_URL}img/escudos/${equipo.logo}`}
+                      alt={equipo.nombre}
+                      className="w-4 h-4 object-contain mx-1"
+                    />
+                    {equipo.nombre} {/* <--- Corrección: Asegura que se muestre equipo.nombre */}
+                  </td>
+                  <td>{equipo.pj || 0}</td>
+                  <td>{equipo.pg || 0}</td>
+                  <td>{equipo.pe || 0}</td>
+                  <td>{equipo.pp || 0}</td>
+                  <td>{equipo.gf || 0}</td>
+                  <td>{equipo.gc || 0}</td>
+                  <td>{(equipo.gf || 0) - (equipo.gc || 0)}</td>
+                  <td className="font-extrabold text-[#7a0026]">{equipo.puntos || 0}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
 }
-
