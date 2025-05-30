@@ -7,7 +7,7 @@ import ModalMVP from "../components/ModalMVP";
 import ToastNotificacion from "../components/ToastNotificacion";
 import useCronometro from "../hooks/useCronometro";
 import { ref, onValue, set, push, get } from "firebase/database";
-import { database } from "../firebase";
+import { db } from "../firebase";
 import { useParams, useNavigate } from "react-router-dom";
 
 // Helper para responsive
@@ -53,11 +53,11 @@ export default function ControlPartido() {
   useEffect(() => {
     if (!partidoId) return;
 
-    const refAlineacion = ref(database, `partidos/${partidoId}/alineacion`);
-    const refGoles = ref(database, `partidos/${partidoId}/eventos/goles`);
-    const refMarcador = ref(database, `partidos/${partidoId}/marcador`);
-    const refCambios = ref(database, `partidos/${partidoId}/eventos/cambios`);
-    const refTarjetas = ref(database, `partidos/${partidoId}/eventos/tarjetas`);
+    const refAlineacion = ref(db, `partidos/${partidoId}/alineacion`);
+    const refGoles = ref(db, `partidos/${partidoId}/eventos/goles`);
+    const refMarcador = ref(db, `partidos/${partidoId}/marcador`);
+    const refCambios = ref(db, `partidos/${partidoId}/eventos/cambios`);
+    const refTarjetas = ref(db, `partidos/${partidoId}/eventos/tarjetas`);
 
     onValue(refAlineacion, (snap) => {
       if (snap.exists()) {
@@ -113,12 +113,12 @@ export default function ControlPartido() {
 
   const confirmarGol = async (jugador) => {
     const equipoKey = mostrarModalGol;
-    const marcadorRef = ref(database, `partidos/${partidoId}/marcador`);
+    const marcadorRef = ref(db, `partidos/${partidoId}/marcador`);
     const nuevoMarcador = { ...goles, [equipoKey]: (goles[equipoKey] || 0) + 1 };
     await set(marcadorRef, nuevoMarcador);
     setGoles(nuevoMarcador);
 
-    const golesRef = ref(database, `partidos/${partidoId}/eventos/goles`);
+    const golesRef = ref(db, `partidos/${partidoId}/eventos/goles`);
     await push(golesRef, {
       equipo: equipoKey,
       jugador: jugador.nombre,
@@ -133,7 +133,7 @@ export default function ControlPartido() {
   const registrarTarjeta = (equipoKey) => setMostrarModalTarjeta(equipoKey);
 
   const confirmarTarjeta = async ({ jugador, tipo, minuto }) => {
-    const tarjetasRef = ref(database, `partidos/${partidoId}/eventos/tarjetas`);
+    const tarjetasRef = ref(db, `partidos/${partidoId}/eventos/tarjetas`);
     await push(tarjetasRef, {
       equipo: mostrarModalTarjeta,
       jugador,
@@ -178,7 +178,7 @@ export default function ControlPartido() {
     }
 
     // 4. Actualizar la alineación en Firebase para reflejar el cambio
-    const refAlineacionJugadores = ref(database, `partidos/${partidoId}/alineacion/${equipoKey}/jugadores`);
+    const refAlineacionJugadores = ref(db, `partidos/${partidoId}/alineacion/${equipoKey}/jugadores`);
     await set(refAlineacionJugadores, nuevaAlineacionJugadores);
 
     // 5. Actualizar el estado local de equipo1 o equipo2
@@ -189,7 +189,7 @@ export default function ControlPartido() {
     }
 
     // 6. Registrar el evento de cambio
-    const cambiosRef = ref(database, `partidos/${partidoId}/eventos/cambios`);
+    const cambiosRef = ref(db, `partidos/${partidoId}/eventos/cambios`);
     await push(cambiosRef, {
       equipo: equipoKey,
       titular,
@@ -209,7 +209,7 @@ export default function ControlPartido() {
   // Guardado total al cerrar MVP
   const guardarTodoEnFirebase = async (mvpSeleccionado) => {
     // Obtener el género del partido desde la alineación
-    const alineacionSnapshot = await get(ref(database, `partidos/${partidoId}/alineacion`));
+    const alineacionSnapshot = await get(ref(db, `partidos/${partidoId}/alineacion`));
     const generoPartido = alineacionSnapshot.val()?.genero || "masculino";
 
     const datosPartido = {
@@ -224,10 +224,10 @@ export default function ControlPartido() {
       terminado: true,
       timestamp: Date.now(),
     };
-    await set(ref(database, `partidos/${partidoId}/resultado`), datosPartido);
+    await set(ref(db, `partidos/${partidoId}/resultado`), datosPartido);
 
     // 1. Actualizar Tablas de Posiciones
-    const refTablas = ref(database, `tablas/${generoPartido}`);
+    const refTablas = ref(db, `tablas/${generoPartido}`);
     const snapTablas = await get(refTablas);
     const tablasActuales = snapTablas.val() || {};
 
@@ -263,7 +263,7 @@ export default function ControlPartido() {
     await set(refTablas, tablasActuales);
 
     // 2. Actualizar Goleadores
-    const refGoleadoresDetalles = ref(database, `goleadoresDetalles/${generoPartido}`);
+    const refGoleadoresDetalles = ref(db, `goleadoresDetalles/${generoPartido}`);
     const snapGoleadoresDetalles = await get(refGoleadoresDetalles);
     const goleadoresDetallesActuales = snapGoleadoresDetalles.val() || {};
 
@@ -285,7 +285,7 @@ export default function ControlPartido() {
     await set(refGoleadoresDetalles, goleadoresDetallesActuales);
 
     // 3. Actualizar Historial
-    const refHistorial = ref(database, `historial/${generoPartido}`);
+    const refHistorial = ref(db, `historial/${generoPartido}`);
     await push(refHistorial, {
         fecha: new Date().toLocaleDateString(),
         genero: generoPartido,

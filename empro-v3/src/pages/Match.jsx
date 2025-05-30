@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { ref, set } from "firebase/database";
-import { database } from "../firebase";
+import { db } from "../firebase";
 
 // Equipos por género
 const equiposMasculino = [
@@ -56,9 +56,9 @@ export default function Match() {
   const iniciarPartido = async () => {
     const equipoLocal = equipos[indexLocal];
     const equipoVisita = equipos[indexVisita];
-    await set(ref(database, `selecciones/equipoLocal`), equipoLocal);
-    await set(ref(database, `selecciones/equipoVisita`), equipoVisita);
-    await set(ref(database, `selecciones/generoPartido`), genero);
+    await set(ref(db, `selecciones/equipoLocal`), equipoLocal);
+    await set(ref(db, `selecciones/equipoVisita`), equipoVisita);
+    await set(ref(db, `selecciones/generoPartido`), genero);
     navigate("/alineacion");
   };
 

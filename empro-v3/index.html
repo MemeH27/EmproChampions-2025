@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Empro Champions 2025</title>
-  <link rel="manifest" href="/EmproChampions-2025/manifest.json" />
+  <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#8d153a" />
   <link rel="icon" href="/EmproChampions-2025/favicon.ico" />
 </head>
@@ -14,17 +14,23 @@
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
   <script type="module">
-    // Registrar el service worker de Firebase Messaging
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/EmproChampions-2025/firebase-messaging-sw.js')
-        .then((registration) => {
-          console.log('Service Worker registrado:', registration);
-        })
-        .catch((error) => {
-          console.error('Fallo el registro del Service Worker:', error);
-        });
-    }
-  </script>
+  if ('serviceWorker' in navigator) {
+    // Determinar la ruta del SW basado en el entorno
+    // En desarrollo con Vite, la base puede no ser necesaria para el SW,
+    // pero en producción (GitHub Pages) sí.
+    const swPath = import.meta.env.DEV 
+      ? '/firebase-messaging-sw.js' // Para desarrollo local con Vite
+      : '/EmproChampions-2025/firebase-messaging-sw.js'; // Para producción
+
+    navigator.serviceWorker.register(swPath, { scope: import.meta.env.DEV ? '/' : '/EmproChampions-2025/' }) // Añadir scope
+      .then((registration) => {
+        console.log('Service Worker registrado:', registration, 'con ruta:', swPath, 'y scope:', registration.scope);
+      })
+      .catch((error) => {
+        console.error('Fallo el registro del Service Worker:', error, 'con ruta:', swPath);
+      });
+  }
+</script>
 </body>
 
 </html>

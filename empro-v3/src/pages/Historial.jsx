@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { ref, onValue } from "firebase/database";
-import { database } from "../firebase";
+import { db } from "../firebase";
 import Navbar from "../components/Navbar";
 
 export default function Historial() {
@@ -11,7 +11,7 @@ export default function Historial() {
   const [detallesVisibles, setDetallesVisibles] = useState({});
 
   useEffect(() => {
-    const refHistorial = ref(database, `historial/${genero}`);
+    const refHistorial = ref(db, `historial/${genero}`);
     onValue(refHistorial, (snap) => {
       const data = snap.val();
       if (data) {

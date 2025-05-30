@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ref, onValue } from "firebase/database";
-import { database } from "../firebase";
+import { db } from "../firebase";
 import Navbar from "../components/Navbar";
 
 export default function Main() {
@@ -8,7 +8,7 @@ export default function Main() {
   const [genero, setGenero] = useState("masculino");
 
   useEffect(() => {
-    const tablaRef = ref(database, `tablas/${genero}`);
+    const tablaRef = ref(db, `tablas/${genero}`);
     const off = onValue(tablaRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {

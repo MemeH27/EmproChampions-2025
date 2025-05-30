@@ -1,28 +1,27 @@
-// ✅ Navbar.jsx — con verificación robusta de sesión para evitar redirección errónea
+// empro-v3/src/components/Navbar.jsx
 
-import { useState, useContext, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useState, useContext } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const { usuario, rol, cargando } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const { usuario, rol, cargando } = useContext(AuthContext); // 'rol' se obtiene del AuthContext
   const location = useLocation();
 
-  useEffect(() => {
-    // Evita redirigir al login si estamos ya en login o registro
-    if (!cargando && !usuario && location.pathname !== "/login" && location.pathname !== "/registro") {
-      setTimeout(() => navigate("/login"), 100);
-    }
-  }, [usuario, cargando, navigate, location.pathname]);
+  // No mostramos el Navbar en las páginas de login o registro,
+  // o si el usuario aún está cargando o no está autenticado.
+  if (cargando || !usuario || location.pathname === "/login" || location.pathname === "/registro") {
+    return null;
+  }
 
-  if (cargando || !usuario) return null;
+  // Determinar si el usuario es admin o superadmin
+  const isAdmin = rol === "admin" || rol === "superadmin";
 
   return (
     <nav className="bg-[#7a0026] text-white px-4 py-3 shadow-md sticky top-0 z-50">
       <div className="max-w-6xl mx-auto flex justify-between items-center">
-        <Link to="/main" className="text-2xl font-bold font-qatar">🏆 Empro</Link>
+        <Link to="/" className="text-2xl font-bold font-qatar">🏆 Empro</Link>
         <button
           className="md:hidden transition-transform"
           onClick={() => setOpen(!open)}
@@ -43,20 +42,21 @@ export default function Navbar() {
         </button>
         <ul className={`md:flex gap-6 text-lg font-bold absolute md:static top-16 left-0 w-full md:w-auto bg-[#7a0026] md:bg-transparent transition-all duration-300 ease-in-out ${open ? "block" : "hidden"}`}>
           <li className="p-3 md:p-0 text-center">
-            <Link to="/main" className="hover:text-yellow-400">Tabla</Link>
+            <Link to="/" className="hover:text-yellow-400" onClick={() => setOpen(false)}>Tabla</Link>
           </li>
           <li className="p-3 md:p-0 text-center">
-            <Link to="/goleadores" className="hover:text-yellow-400">Goleadores</Link>
+            <Link to="/goleadores" className="hover:text-yellow-400" onClick={() => setOpen(false)}>Goleadores</Link>
           </li>
           <li className="p-3 md:p-0 text-center">
-            <Link to="/historial" className="hover:text-yellow-400">Historial</Link>
+            <Link to="/historial" className="hover:text-yellow-400" onClick={() => setOpen(false)}>Historial</Link>
           </li>
           <li className="p-3 md:p-0 text-center">
-            <Link to="/configuracion" className="hover:text-yellow-400">Cuenta</Link>
+            <Link to="/configuracion" className="hover:text-yellow-400" onClick={() => setOpen(false)}>Cuenta</Link>
           </li>
-          {rol === "admin" && (
+          {/* Mostrar "Nuevo Partido" solo si es admin o superadmin */}
+          {isAdmin && (
             <li className="p-3 md:p-0 text-center">
-              <Link to="/match" className="hover:text-yellow-400">➕ Nuevo Partido</Link>
+              <Link to="/partido/configurar" className="hover:text-yellow-400" onClick={() => setOpen(false)}>➕ Nuevo Partido</Link>
             </li>
           )}
         </ul>
@@ -64,4 +64,3 @@ export default function Navbar() {
     </nav>
   );
 }
-

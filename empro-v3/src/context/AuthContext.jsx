@@ -1,7 +1,8 @@
+// empro-v3/src/context/AuthContext.jsx
 import { createContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { ref, get, onValue } from "firebase/database"; // Importa 'onValue'
-import { auth, database } from "../firebase";
+import { ref, get, onValue } from "firebase/database"; // Funciones de Firebase Realtime Database
+import { auth, db } from "../firebase"; // MODIFICADO AQUÍ: cambia 'database' por 'db'
 
 export const AuthContext = createContext();
 
@@ -23,7 +24,8 @@ export function AuthProvider({ children }) {
           unsubscribeRole();
         }
 
-        const userRoleRef = ref(database, `usuarios/${user.uid}/rol`);
+        // Usa la variable 'db' importada correctamente
+        const userRoleRef = ref(db, `usuarios/${user.uid}/rol`); 
         unsubscribeRole = onValue(userRoleRef, (snapshot) => {
           if (snapshot.exists()) {
             const userRole = snapshot.val();

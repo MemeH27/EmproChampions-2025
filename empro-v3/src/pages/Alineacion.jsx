@@ -5,43 +5,38 @@ import { useNavigate } from "react-router-dom";
 import "../fonts/barcelona.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { ref, push, set, get } from "firebase/database";
-import { database } from "../firebase";
-
-// Importar los datos de jugadores separados por género o una estructura que permita filtrarlos
-// Por simplicidad, aquí se hardcodea si no tienes un sistema de base de datos para esto aún.
+import { db } from "../firebase";
 import jugadoresData from "../data/jugadores.json";
 
 export default function Alineacion() {
   const navigate = useNavigate();
-  const [equipoLocal, setEquipoLocal] = useState(null);
-  const [equipoVisita, setEquipoVisita] = useState(null);
-  const [genero, setGenero] = useState("masculino"); // 'masculino' o 'femenino'
+  const location = useLocation(); // Para obtener el estado pasado por navigate
+
+  // Estados para los datos del partido que vienen de Match.jsx
+  const [partidoConfig, setPartidoConfig] = useState(null);
+  // partidoConfig contendrá { equipoLocal, equipoVisita, genero, fecha }
+
   const [jugadoresLocal, setJugadoresLocal] = useState(Array(6).fill({ nombre: "", dorsal: "" }));
   const [jugadoresVisita, setJugadoresVisita] = useState(Array(6).fill({ nombre: "", dorsal: "" }));
   const [modalData, setModalData] = useState(null);
+  const [confirmando, setConfirmando] = useState(false);
 
   useEffect(() => {
-    async function cargarEquiposYGenero() {
-      const snapLocal = await get(ref(database, `selecciones/equipoLocal`));
-      const snapVisita = await get(ref(database, `selecciones/equipoVisita`));
-      const snapGenero = await get(ref(database, `selecciones/generoPartido`));
-
-      if (snapLocal.exists() && snapVisita.exists() && snapGenero.exists()) {
-        setEquipoLocal(snapLocal.val());
-        setEquipoVisita(snapVisita.val());
-        setGenero(snapGenero.val());
-      } else {
-        navigate("/match");
-      }
+    if (location.state && location.state.equipoLocal && location.state.equipoVisita && location.state.genero && location.state.fecha) {
+      console.log("[Alineacion.jsx] Datos recibidos de Match.jsx:", location.state);
+      setPartidoConfig(location.state);
+    } else {
+      // Si no hay datos en el estado, es un error o se accedió directamente a la URL
+      console.warn("[Alineacion.jsx] No se recibieron datos de configuración del partido. Redirigiendo a configurar.");
+      navigate("/partido/configurar"); // Redirige a la selección de equipos
     }
-    cargarEquiposYGenero();
-  }, [navigate]);
+  }, [location.state, navigate]);
 
   const abrirModal = (index, tipo) => {
     const jugador = tipo === "local" ? jugadoresLocal[index] : jugadoresVisita[index];
     const jugadoresActuales = tipo === "local" ? jugadoresLocal : jugadoresVisita;
     const nombreEquipo = tipo === "local" ? equipoLocal?.nombre : equipoVisita?.nombre;
-    
+
     // Pasar el género actual para que ModalJugador cargue la lista correcta
     setModalData({ tipo, index, jugador, jugadoresActuales, nombreEquipo, generoPartido: genero });
   };
@@ -72,7 +67,7 @@ export default function Alineacion() {
         return;
       }
 
-      const partidosRef = ref(database, "partidos");
+      const partidosRef = ref(db, "partidos");
       const nuevoPartidoRef = push(partidosRef);
       partidoId = nuevoPartidoRef.key;
 
@@ -85,8 +80,8 @@ export default function Alineacion() {
       let todosJugadoresVisita = [];
 
       try {
-        const snapLocalPlantilla = await get(ref(database, `plantillas/${genero.toLowerCase()}/${equipoLocal.nombre.toLowerCase()}`));
-        const snapVisitaPlantilla = await get(ref(database, `plantillas/${genero.toLowerCase()}/${equipoVisita.nombre.toLowerCase()}`));
+        const snapLocalPlantilla = await get(ref(db, `plantillas/${genero.toLowerCase()}/${equipoLocal.nombre.toLowerCase()}`));
+        const snapVisitaPlantilla = await get(ref(db, `plantillas/${genero.toLowerCase()}/${equipoVisita.nombre.toLowerCase()}`));
 
         if (snapLocalPlantilla.exists()) todosJugadoresLocal = snapLocalPlantilla.val();
         else todosJugadoresLocal = jugadoresData[equipoLocal.nombre.toLowerCase()] || []; // Fallback a JSON local si no está en Firebase
@@ -129,13 +124,13 @@ export default function Alineacion() {
 
       console.log("Guardando alineación", { equipo1: equipo1Data, equipo2: equipo2Data, genero, partidoId });
 
-      await set(ref(database, `partidos/${partidoId}/alineacion`), {
+      await set(ref(db, `partidos/${partidoId}/alineacion`), {
         equipo1: equipo1Data,
         equipo2: equipo2Data,
         genero: genero, // Guarda el género a nivel de partido también
       });
 
-      await set(ref(database, `partidos/${partidoId}/marcador`), {
+      await set(ref(db, `partidos/${partidoId}/marcador`), {
         equipo1: 0,
         equipo2: 0
       });

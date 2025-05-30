@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ref, onValue } from "firebase/database";
-import { database } from "../firebase";
+import { db } from "../firebase";
 import Navbar from "../components/Navbar";
 
 export default function Goleadores() {
@@ -9,7 +9,7 @@ export default function Goleadores() {
   const [detallesVisibles, setDetallesVisibles] = useState({});
 
   useEffect(() => {
-    const refGoles = ref(database, `goleadoresDetalles/${genero}`);
+    const refGoles = ref(db, `goleadoresDetalles/${genero}`);
     onValue(refGoles, (snap) => {
       const data = snap.val();
       if (data) {

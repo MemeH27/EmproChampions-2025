@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { auth, database } from "../firebase";
+// MODIFICADO AQUÍ:
+import { auth, db } from "../firebase"; // Cambia 'database' por 'db'
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { ref, set } from "firebase/database";
 
@@ -27,24 +28,29 @@ export default function Registro() {
         nombre,
         apellido,
         correo: email,
-        rol: "usuario",
+        rol: "usuario", // Todos los nuevos registros son 'usuario' por defecto
         iniciales: generarIniciales(nombre, apellido),
-        foto: null,
+        foto: null, // O una URL a una foto por defecto si la tienes
       };
 
-      await set(ref(database, `usuarios/${uid}`), usuarioData);
+      // USA 'db' aquí:
+      await set(ref(db, `usuarios/${uid}`), usuarioData);
 
-      // ✅ Enviar correo de verificación
+      // Enviar correo de verificación
       await sendEmailVerification(result.user);
-      alert("Cuenta creada. Se ha enviado un correo de verificación.");
+      alert("¡Cuenta creada exitosamente! Se ha enviado un correo de verificación a tu dirección de email. Por favor, verifica tu correo para activar tu cuenta.");
 
-      navigate("/login");
+      navigate("/login"); // Redirige a login para que inicien sesión después de verificar
 
     } catch (error) {
+      console.error("Error al crear la cuenta:", error); // Es bueno loguear el error completo
       if (error.code === "auth/email-already-in-use") {
-        alert("Este correo ya está registrado.");
-      } else {
-        alert("Error al crear la cuenta: " + error.message);
+        alert("Este correo electrónico ya está registrado. Por favor, intenta con otro o inicia sesión.");
+      } else if (error.code === "auth/weak-password") {
+        alert("La contraseña es demasiado débil. Debe tener al menos 6 caracteres.");
+      }
+      else {
+        alert("Error al crear la cuenta. Por favor, inténtalo de nuevo. Detalles: " + error.message);
       }
     }
   };
@@ -61,7 +67,7 @@ export default function Registro() {
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-[#7a0026] rounded-md"
+            className="w-full px-4 py-2 border border-[#7a0026] rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFD700]"
           />
           <input
             type="text"
@@ -69,7 +75,7 @@ export default function Registro() {
             value={apellido}
             onChange={(e) => setApellido(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-[#7a0026] rounded-md"
+            className="w-full px-4 py-2 border border-[#7a0026] rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFD700]"
           />
           <input
             type="email"
@@ -77,15 +83,15 @@ export default function Registro() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-[#7a0026] rounded-md"
+            className="w-full px-4 py-2 border border-[#7a0026] rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFD700]"
           />
           <input
             type="password"
-            placeholder="Contraseña"
+            placeholder="Contraseña (mín. 6 caracteres)"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-[#7a0026] rounded-md"
+            className="w-full px-4 py-2 border border-[#7a0026] rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFD700]"
           />
           <button
             type="submit"

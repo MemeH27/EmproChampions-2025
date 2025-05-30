@@ -5,7 +5,7 @@ import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import Cropper from "react-easy-crop";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { database, storage } from "../firebase";
+import { db, storage } from "../firebase";
 import { ref as dbRef, update } from "firebase/database";
 import getCroppedImg from "../utils/cropImage";
 

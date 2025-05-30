@@ -3,7 +3,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { ref as dbRef, get, update, set } from "firebase/database";
-import { auth, database } from "../firebase";
+import { auth, db } from "../firebase";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -29,7 +29,7 @@ export default function Configuracion() {
 
   useEffect(() => {
     if (usuario) {
-      const refUsuario = dbRef(database, `usuarios/${usuario.uid}`);
+      const refUsuario = dbRef(db, `usuarios/${usuario.uid}`);
       get(refUsuario).then(async (snap) => {
         const displayName = usuario.displayName || "";
         const nombreGoogle = displayName.split(" ")[0] || "";
@@ -82,7 +82,7 @@ export default function Configuracion() {
 
   const guardarCambios = async () => {
     if (!usuario) return;
-    const refUsuario = dbRef(database, `usuarios/${usuario.uid}`);
+    const refUsuario = dbRef(db, `usuarios/${usuario.uid}`);
     const nuevosDatos = {
       nombre,
       apellido,
