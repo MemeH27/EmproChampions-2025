@@ -1,15 +1,37 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Redirigiendo...</title>
-    <script>
-      sessionStorage.redirect = location.pathname + location.search;
-      window.location.href = "/EmproChampions-2025/";
-    </script>
-  </head>
-  <body>
-    <p>Redirigiendo a la app...</p>
-  </body>
-</html>
+<head>
+  <meta charset="utf-8">
+  <title>EmproChampions - Redirigiendo...</title>
+  <script type="text/javascript">
+    // Guarda la ruta a la que se intentó acceder
+    const redirect = sessionStorage.redirect;
+    delete sessionStorage.redirect;
 
+    // Si hay una ruta guardada y no es la página actual (para evitar bucles),
+    // redirige a ella dentro del contexto de la app SPA.
+    // De lo contrario, redirige a la página de inicio.
+    // La ruta base '/EmproChampions-2025/' ya está incluida en location.pathname
+    // por lo que si la ruta original era /EmproChampions-2025/ruta-inexistente,
+    // location.pathname será /EmproChampions-2025/ruta-inexistente.
+    // El script de main.jsx se encargará de manejarla.
+    if (redirect && redirect !== location.href) {
+      sessionStorage.redirect = redirect; // Vuelve a guardarla para main.jsx
+    } else {
+      // Si no hay redirect o es la misma página, guarda la ruta actual
+      // excepto si es la propia 404.html
+      if (location.pathname.endsWith('404.html')) {
+        sessionStorage.redirect = '/'; // Redirige a la raíz en este caso
+      } else {
+        sessionStorage.redirect = location.pathname + location.search + location.hash;
+      }
+    }
+    // Redirige a la raíz de la aplicación React.
+    // Vite se encarga de la ruta base. main.jsx leerá sessionStorage.redirect.
+    location.replace('/EmproChampions-2025/');
+  </script>
+</head>
+<body>
+  <p>Si no eres redirigido automáticamente, <a href="/EmproChampions-2025/">haz clic aquí</a>.</p>
+</body>
+</html>

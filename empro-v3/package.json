@@ -5,7 +5,7 @@
   "homepage": "https://memeh27.github.io/EmproChampions-2025",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && copy 404.html dist\\404.html",
+    "build": "vite build",
     "preview": "vite preview",
     "deploy": "npm run build && gh-pages -d dist"
   },

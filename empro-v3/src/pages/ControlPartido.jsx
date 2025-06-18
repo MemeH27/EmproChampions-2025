@@ -232,32 +232,32 @@ export default function ControlPartido() {
     const tablasActuales = snapTablas.val() || {};
 
     const actualizarEstadisticas = (equipoActual, golesAFavor, golesEnContra, resultado) => {
-        const stats = { ...tablasActuales[equipoActual.nombre] || { pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, puntos: 0, logo: equipoActual.logo } };
-        stats.pj++;
-        stats.gf += golesAFavor;
-        stats.gc += golesEnContra;
+      const stats = { ...tablasActuales[equipoActual.nombre] || { pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, puntos: 0, logo: equipoActual.logo } };
+      stats.pj++;
+      stats.gf += golesAFavor;
+      stats.gc += golesEnContra;
 
-        if (resultado === 'victoria') {
-            stats.pg++;
-            stats.puntos += 3;
-        } else if (resultado === 'empate') {
-            stats.pe++;
-            stats.puntos += 1;
-        } else { // derrota
-            stats.pp++;
-        }
-        tablasActuales[equipoActual.nombre] = stats;
+      if (resultado === 'victoria') {
+        stats.pg++;
+        stats.puntos += 3;
+      } else if (resultado === 'empate') {
+        stats.pe++;
+        stats.puntos += 1;
+      } else { // derrota
+        stats.pp++;
+      }
+      tablasActuales[equipoActual.nombre] = stats;
     };
 
     if (goles.equipo1 > goles.equipo2) {
-        actualizarEstadisticas(equipo1, goles.equipo1, goles.equipo2, 'victoria');
-        actualizarEstadisticas(equipo2, goles.equipo2, goles.equipo1, 'derrota');
+      actualizarEstadisticas(equipo1, goles.equipo1, goles.equipo2, 'victoria');
+      actualizarEstadisticas(equipo2, goles.equipo2, goles.equipo1, 'derrota');
     } else if (goles.equipo2 > goles.equipo1) {
-        actualizarEstadisticas(equipo1, goles.equipo1, goles.equipo2, 'derrota');
-        actualizarEstadisticas(equipo2, goles.equipo2, goles.equipo1, 'victoria');
+      actualizarEstadisticas(equipo1, goles.equipo1, goles.equipo2, 'derrota');
+      actualizarEstadisticas(equipo2, goles.equipo2, goles.equipo1, 'victoria');
     } else {
-        actualizarEstadisticas(equipo1, goles.equipo1, goles.equipo2, 'empate');
-        actualizarEstadisticas(equipo2, goles.equipo2, goles.equipo1, 'empate');
+      actualizarEstadisticas(equipo1, goles.equipo1, goles.equipo2, 'empate');
+      actualizarEstadisticas(equipo2, goles.equipo2, goles.equipo1, 'empate');
     }
 
     await set(refTablas, tablasActuales);
@@ -268,38 +268,38 @@ export default function ControlPartido() {
     const goleadoresDetallesActuales = snapGoleadoresDetalles.val() || {};
 
     for (const gol of golesRegistrados) {
-        if (!goleadoresDetallesActuales[gol.jugador]) {
-            goleadoresDetallesActuales[gol.jugador] = [];
-        }
+      if (!goleadoresDetallesActuales[gol.jugador]) {
+        goleadoresDetallesActuales[gol.jugador] = [];
+      }
 
-        const equipoGoleador = gol.equipo === "equipo1" ? equipo1 : equipo2;
+      const equipoGoleador = gol.equipo === "equipo1" ? equipo1 : equipo2;
 
-        goleadoresDetallesActuales[gol.jugador].push({
-            minuto: gol.minuto,
-            partido: `${equipo1.nombre} vs ${equipo2.nombre}`,
-            fecha: new Date().toLocaleDateString(),
-            equipo: equipoGoleador.nombre,
-            logo: equipoGoleador.logo
-        });
+      goleadoresDetallesActuales[gol.jugador].push({
+        minuto: gol.minuto,
+        partido: `${equipo1.nombre} vs ${equipo2.nombre}`,
+        fecha: new Date().toLocaleDateString(),
+        equipo: equipoGoleador.nombre,
+        logo: equipoGoleador.logo
+      });
     }
     await set(refGoleadoresDetalles, goleadoresDetallesActuales);
 
     // 3. Actualizar Historial
     const refHistorial = ref(db, `historial/${generoPartido}`);
     await push(refHistorial, {
-        fecha: new Date().toLocaleDateString(),
-        genero: generoPartido,
-        equipo1: equipo1.nombre,
-        equipo2: equipo2.nombre,
-        goles1: goles.equipo1,
-        goles2: goles.equipo2,
-        minutos: obtenerMinuto(),
-        mvp: mvpSeleccionado ? mvpSeleccionado.jugador : "N/A",
-        detalles: [
-            ...golesRegistrados.map(g => ({ tipo: 'gol', jugador: g.jugador, minuto: g.minuto })),
-            ...tarjetas.map(t => ({ tipo: `${t.tipo} tarjeta`, jugador: t.jugador, minuto: t.minuto })),
-            ...cambios.map(c => ({ tipo: 'cambio', jugador: `${c.titular} por ${c.suplente}`, minuto: c.minuto }))
-        ]
+      fecha: new Date().toLocaleDateString(),
+      genero: generoPartido,
+      equipo1: equipo1.nombre,
+      equipo2: equipo2.nombre,
+      goles1: goles.equipo1,
+      goles2: goles.equipo2,
+      minutos: obtenerMinuto(),
+      mvp: mvpSeleccionado ? mvpSeleccionado.jugador : "N/A",
+      detalles: [
+        ...golesRegistrados.map(g => ({ tipo: 'gol', jugador: g.jugador, minuto: g.minuto })),
+        ...tarjetas.map(t => ({ tipo: `${t.tipo} tarjeta`, jugador: t.jugador, minuto: t.minuto })),
+        ...cambios.map(c => ({ tipo: 'cambio', jugador: `${c.titular} por ${c.suplente}`, minuto: c.minuto }))
+      ]
     });
 
     setMostrarMVP(false);
@@ -322,50 +322,54 @@ export default function ControlPartido() {
     const negros = ["don bosco", "luz", "emprosaurios"];
     return negros.includes(nombre?.toLowerCase()) ? "#000" : "#fff";
   };
-  const renderJugador = (jug, i, equipoObj) => (
-    <div
-      key={jug.nombre} // Usar jug.nombre como key para identificar unívocamente
-      className="absolute"
-      style={{
-        top: posiciones[i].top,
-        left: posiciones[i].left,
-        transform: "translate(-50%, -50%)",
-        opacity: jug.enJuego === false ? 0.4 : 1, // Opacidad si el jugador ya no está en juego
-        transition: 'opacity 0.3s ease-in-out' // Transición suave para la opacidad
-      }}
-    >
-      <div className="relative flex flex-col items-center">
-        <div
-          className="absolute top-[8%] font-barcelona text-[20px] md:text-[28px] z-20"
-          style={{
-            color: getColorDorsal(equipoObj?.nombre || ''),
-            textShadow: "1px 1px 1px rgba(0,0,0,0.7)"
-          }}
-        >
-          {jug.dorsal}
+  const renderJugador = (jug, i, equipoObj) => {
+    if (!posiciones[i]) return null; // Evita crasheo si hay más jugadores que posiciones
+
+    return (
+      <div
+        key={jug.nombre}
+        className="absolute"
+        style={{
+          top: posiciones[i]?.top || "0%",
+          left: posiciones[i]?.left || "0%",
+          transform: "translate(-50%, -50%)",
+          opacity: jug.enJuego === false ? 0.4 : 1,
+          transition: 'opacity 0.3s ease-in-out'
+        }}
+      >
+        <div className="relative flex flex-col items-center">
+          <div
+            className="absolute top-[8%] font-barcelona text-[20px] md:text-[28px] z-20"
+            style={{
+              color: getColorDorsal(equipoObj?.nombre || ''),
+              textShadow: "1px 1px 1px rgba(0,0,0,0.7)"
+            }}
+          >
+            {jug.dorsal}
+          </div>
+          <img src={getCamiseta(equipoObj?.nombre)} className="w-10 md:w-14" alt="jugador" />
+          <div className="absolute bottom-[-14px] font-barcelona text-[10px] md:text-[13px] text-white bg-black/80 px-2 py-[2px] rounded text-center z-20 whitespace-nowrap overflow-hidden text-ellipsis max-w-[70px]">
+            {jug.nombre}
+          </div>
+          {jug.haJugado && jug.enJuego === false && (
+            <span style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              fontSize: '30px',
+              color: 'red',
+              textShadow: '0 0 5px black',
+              pointerEvents: 'none'
+            }}>
+              ⬇️
+            </span>
+          )}
         </div>
-        <img src={getCamiseta(equipoObj?.nombre)} className="w-10 md:w-14" alt="jugador" />
-        <div className="absolute bottom-[-14px] font-barcelona text-[10px] md:text-[13px] text-white bg-black/80 px-2 py-[2px] rounded text-center z-20 whitespace-nowrap overflow-hidden text-ellipsis max-w-[70px]">
-          {jug.nombre}
-        </div>
-        {/* Indicador visual si el jugador ha sido sustituido y no está en juego */}
-        {jug.haJugado && jug.enJuego === false && (
-          <span style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            fontSize: '30px',
-            color: 'red',
-            textShadow: '0 0 5px black',
-            pointerEvents: 'none' // Asegurarse de que no interfiera con clics
-          }}>
-            ⬇️
-          </span>
-        )}
       </div>
-    </div>
-  );
+    );
+  };
+
 
   if (!equipo1 || !equipo2) {
     return (
@@ -555,60 +559,31 @@ export default function ControlPartido() {
         </div>
         <img src={`${import.meta.env.BASE_URL}img/escudos/${equipo2.logo}`} className="w-16 h-16 object-contain" />
       </div>
-
-      {/* Mostrar eventos: Ajustado para móviles con scroll */}
-      <div className="flex flex-row w-full max-w-lg mt-3 gap-2">
-        <div className="flex-1 max-h-[150px] overflow-y-auto"> {/* Ajustado para scroll */}
-          {golesEq1.map((gol, i) => (
-            <div key={i} className="text-base flex items-center gap-2 justify-end">
-              <span>⚽</span>
-              <span className="font-bold whitespace-nowrap overflow-hidden text-ellipsis max-w-[90px]">{gol.jugador}</span>
-              <span className="ml-1 text-xs text-gray-200">{gol.minuto}'</span>
+      <div className="w-full max-h-[200px] overflow-y-auto flex flex-col items-center mt-4 gap-1">
+        {[...golesRegistrados.map(g => ({ tipo: 'gol', ...g })),
+        ...tarjetas.map(t => ({ tipo: 'tarjeta', ...t })),
+        ...cambios.map(c => ({ tipo: 'cambio', ...c }))
+        ]
+          .sort((a, b) => {
+            const [aMin, aSeg] = a.minuto.split(":").map(Number);
+            const [bMin, bSeg] = b.minuto.split(":").map(Number);
+            return (aMin * 60 + aSeg) - (bMin * 60 + bSeg);
+          })
+          .map((ev, i) => (
+            <div key={i} className="flex items-center gap-2 text-lg md:text-xl font-bold text-white">
+              <span>
+                {ev.tipo === 'gol' && '⚽'}
+                {ev.tipo === 'tarjeta' && (ev.tipoTarjeta === 'roja' || ev.tipo === 'roja' ? '🟥' : '🟨')}
+                {ev.tipo === 'cambio' && '🔄'}
+              </span>
+              <span className="whitespace-nowrap overflow-hidden text-ellipsis max-w-[130px]">
+                {ev.jugador || `${ev.titular} ➜ ${ev.suplente}`}
+              </span>
+              <span className="text-sm text-gray-300">{ev.minuto}'</span>
             </div>
           ))}
-          {tarjetas.filter(t => t.equipo === "equipo1").map((t, i) => (
-            <div key={`tarjeta1-m-${i}`} className="text-base flex items-center gap-2 justify-end">
-              <span>{t.tipo === 'amarilla' ? '🟨' : '🟥'}</span>
-              <span className="font-bold whitespace-nowrap overflow-hidden text-ellipsis max-w-[90px]">{t.jugador}</span>
-              <span className="ml-1 text-xs text-gray-200">{t.minuto}'</span>
-            </div>
-          ))}
-          {cambios.filter(c => c.equipo === "equipo1").map((c, i) => (
-            <div key={`cambio1-m-${i}`} className="flex items-center gap-1 justify-end text-sm mt-1">
-              <span className="text-red-500">⬅️</span>
-              <span className="font-bold whitespace-nowrap">{c.titular}</span>
-              <span className="text-green-500">➡️</span>
-              <span className="font-bold whitespace-nowrap">{c.suplente}</span>
-              <span className="text-gray-300 text-xs">{c.minuto}'</span>
-            </div>
-          ))}
-        </div>
-        <div className="flex-1 max-h-[150px] overflow-y-auto"> {/* Ajustado para scroll */}
-          {golesEq2.map((gol, i) => (
-            <div key={i} className="text-base flex items-center gap-2 justify-start">
-              <span>⚽</span>
-              <span className="font-bold whitespace-nowrap overflow-hidden text-ellipsis max-w-[90px]">{gol.jugador}</span>
-              <span className="ml-1 text-xs text-gray-200">{gol.minuto}'</span>
-            </div>
-          ))}
-          {tarjetas.filter(t => t.equipo === "equipo2").map((t, i) => (
-            <div key={`tarjeta2-m-${i}`} className="text-base flex items-center gap-2 justify-start">
-              <span>{t.tipo === 'amarilla' ? '🟨' : '🟥'}</span>
-              <span className="font-bold whitespace-nowrap overflow-hidden text-ellipsis max-w-[90px]">{t.jugador}</span>
-              <span className="ml-1 text-xs text-gray-200">{t.minuto}'</span>
-            </div>
-          ))}
-          {cambios.filter(c => c.equipo === "equipo2").map((c, i) => (
-            <div key={`cambio2-m-${i}`} className="flex items-center gap-1 justify-start text-sm mt-1">
-              <span className="text-red-500">⬅️</span>
-              <span className="font-bold whitespace-nowrap">{c.titular}</span>
-              <span className="text-green-500">➡️</span>
-              <span className="font-bold whitespace-nowrap">{c.suplente}</span>
-              <span className="text-gray-300 text-xs">{c.minuto}'</span>
-            </div>
-          ))}
-        </div>
       </div>
+
       {/* Fin de eventos */}
       <div className="w-full flex flex-col items-center gap-3 mt-6 max-w-[250px]">
         <button onClick={() => registrarGol("equipo1")} className="bg-green-500 w-full py-3 rounded-full font-bold text-lg">Gol Equipo 1</button>
@@ -641,34 +616,34 @@ export default function ControlPartido() {
         <div className="mt-1 w-full">
           <h3 className="text-center font-bold text-base text-yellow-400">Suplentes</h3>
           <div className="flex flex-wrap gap-1 justify-center">
-                {suplentes2.map((s, i) => (
-                  <div key={s.nombre} className="bg-white/80 text-[#7a0026] rounded-xl px-2 py-0.5 font-bold text-xs whitespace-nowrap overflow-hidden text-ellipsis max-w-[70px]">
-                    {s.nombre} (#{s.dorsal})
-                  </div>
-                ))}
+            {suplentes2.map((s, i) => (
+              <div key={s.nombre} className="bg-white/80 text-[#7a0026] rounded-xl px-2 py-0.5 font-bold text-xs whitespace-nowrap overflow-hidden text-ellipsis max-w-[70px]">
+                {s.nombre} (#{s.dorsal})
               </div>
-            </div>
-            <div className="w-full max-h-[100px] overflow-y-auto">
-              {cambios.filter(c => c.equipo === "equipo2").map((c, i) => (
-                <div key={`cambio-movil-2-${i}`} className="flex items-center gap-1 justify-center text-sm mt-1">
-                  <span className="text-red-500">⬅️</span>
-                  <span className="font-bold whitespace-nowrap">{c.titular}</span>
-                  <span className="text-green-500">➡️</span>
-                  <span className="font-bold whitespace-nowrap">{c.suplente}</span>
-                  <span className="text-gray-300 text-xs">{c.minuto}'</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="text-center mt-8">
-            <button
-              onClick={finalizarPartido}
-              className="bg-yellow-500 hover:bg-yellow-600 text-black font-extrabold text-2xl px-10 py-4 rounded-full shadow-xl"
-            >
-              Finalizar Partido
-            </button>
+            ))}
           </div>
         </div>
+        <div className="w-full max-h-[100px] overflow-y-auto">
+          {cambios.filter(c => c.equipo === "equipo2").map((c, i) => (
+            <div key={`cambio-movil-2-${i}`} className="flex items-center gap-1 justify-center text-sm mt-1">
+              <span className="text-red-500">⬅️</span>
+              <span className="font-bold whitespace-nowrap">{c.titular}</span>
+              <span className="text-green-500">➡️</span>
+              <span className="font-bold whitespace-nowrap">{c.suplente}</span>
+              <span className="text-gray-300 text-xs">{c.minuto}'</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="text-center mt-8">
+        <button
+          onClick={finalizarPartido}
+          className="bg-yellow-500 hover:bg-yellow-600 text-black font-extrabold text-2xl px-10 py-4 rounded-full shadow-xl"
+        >
+          Finalizar Partido
+        </button>
+      </div>
+    </div>
   );
 
   return (

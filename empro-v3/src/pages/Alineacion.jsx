@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import ModalJugador from "../components/ModalJugador";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../fonts/barcelona.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { ref, push, set, get } from "firebase/database";
@@ -10,11 +10,12 @@ import jugadoresData from "../data/jugadores.json";
 
 export default function Alineacion() {
   const navigate = useNavigate();
-  const location = useLocation(); // Para obtener el estado pasado por navigate
+  const location = useLocation();
 
-  // Estados para los datos del partido que vienen de Match.jsx
   const [partidoConfig, setPartidoConfig] = useState(null);
-  // partidoConfig contendrá { equipoLocal, equipoVisita, genero, fecha }
+  const [equipoLocal, setEquipoLocal] = useState(null);
+  const [equipoVisita, setEquipoVisita] = useState(null);
+  const [genero, setGenero] = useState(null);
 
   const [jugadoresLocal, setJugadoresLocal] = useState(Array(6).fill({ nombre: "", dorsal: "" }));
   const [jugadoresVisita, setJugadoresVisita] = useState(Array(6).fill({ nombre: "", dorsal: "" }));
@@ -25,10 +26,12 @@ export default function Alineacion() {
     if (location.state && location.state.equipoLocal && location.state.equipoVisita && location.state.genero && location.state.fecha) {
       console.log("[Alineacion.jsx] Datos recibidos de Match.jsx:", location.state);
       setPartidoConfig(location.state);
+      setEquipoLocal(location.state.equipoLocal);
+      setEquipoVisita(location.state.equipoVisita);
+      setGenero(location.state.genero);
     } else {
-      // Si no hay datos en el estado, es un error o se accedió directamente a la URL
       console.warn("[Alineacion.jsx] No se recibieron datos de configuración del partido. Redirigiendo a configurar.");
-      navigate("/partido/configurar"); // Redirige a la selección de equipos
+      navigate("/partido/configurar");
     }
   }, [location.state, navigate]);
 
@@ -37,7 +40,6 @@ export default function Alineacion() {
     const jugadoresActuales = tipo === "local" ? jugadoresLocal : jugadoresVisita;
     const nombreEquipo = tipo === "local" ? equipoLocal?.nombre : equipoVisita?.nombre;
 
-    // Pasar el género actual para que ModalJugador cargue la lista correcta
     setModalData({ tipo, index, jugador, jugadoresActuales, nombreEquipo, generoPartido: genero });
   };
 
@@ -57,11 +59,7 @@ export default function Alineacion() {
   const confirmar = async () => {
     let partidoId = null;
     try {
-      const validar = (jugadores) =>
-        jugadores.every(
-          (j) => j.nombre.trim() !== "" && j.dorsal.trim() !== ""
-        );
-
+      const validar = (jugadores) => jugadores.every((j) => j.nombre.trim() !== "" && j.dorsal.trim() !== "");
       if (!validar(jugadoresLocal) || !validar(jugadoresVisita)) {
         alert("Todos los jugadores deben tener nombre y dorsal antes de continuar.");
         return;
@@ -71,11 +69,6 @@ export default function Alineacion() {
       const nuevoPartidoRef = push(partidosRef);
       partidoId = nuevoPartidoRef.key;
 
-      // Cargar TODOS los jugadores del equipo según el género desde Firebase o JSON
-      // Asumiendo que ahora tu estructura en Firebase para plantillas es algo como:
-      // /plantillas/masculino/atrapados [...]
-      // /plantillas/femenino/bosco [...]
-
       let todosJugadoresLocal = [];
       let todosJugadoresVisita = [];
 
@@ -84,42 +77,32 @@ export default function Alineacion() {
         const snapVisitaPlantilla = await get(ref(db, `plantillas/${genero.toLowerCase()}/${equipoVisita.nombre.toLowerCase()}`));
 
         if (snapLocalPlantilla.exists()) todosJugadoresLocal = snapLocalPlantilla.val();
-        else todosJugadoresLocal = jugadoresData[equipoLocal.nombre.toLowerCase()] || []; // Fallback a JSON local si no está en Firebase
+        else todosJugadoresLocal = jugadoresData[equipoLocal.nombre.toLowerCase()] || [];
 
         if (snapVisitaPlantilla.exists()) todosJugadoresVisita = snapVisitaPlantilla.val();
-        else todosJugadoresVisita = jugadoresData[equipoVisita.nombre.toLowerCase()] || []; // Fallback a JSON local
+        else todosJugadoresVisita = jugadoresData[equipoVisita.nombre.toLowerCase()] || [];
       } catch (e) {
         console.error("Error cargando plantillas de suplentes (Alineacion.jsx):", e);
-        // Si hay error en Firebase, intentar cargar desde JSON local como fallback
         todosJugadoresLocal = jugadoresData[equipoLocal.nombre.toLowerCase()] || [];
         todosJugadoresVisita = jugadoresData[equipoVisita.nombre.toLowerCase()] || [];
       }
-
 
       const equipo1Data = {
         nombre: equipoLocal.nombre,
         logo: equipoLocal.escudo.split("/").pop(),
         camisa: `camisa-${equipoLocal.nombre.toLowerCase().replace(/\s+/g, "-")}.png`,
-        jugadores: jugadoresLocal.map((j) => ({
-          ...j,
-          enJuego: true,
-          haJugado: true,
-        })),
+        jugadores: jugadoresLocal.map((j) => ({ ...j, enJuego: true, haJugado: true })),
         todosJugadores: todosJugadoresLocal,
-        genero: genero // Asegura que el género también se guarde en los datos del equipo
+        genero: genero
       };
 
       const equipo2Data = {
         nombre: equipoVisita.nombre,
         logo: equipoVisita.escudo.split("/").pop(),
         camisa: `camisa-${equipoVisita.nombre.toLowerCase().replace(/\s+/g, "-")}.png`,
-        jugadores: jugadoresVisita.map((j) => ({
-          ...j,
-          enJuego: true,
-          haJugado: true,
-        })),
+        jugadores: jugadoresVisita.map((j) => ({ ...j, enJuego: true, haJugado: true })),
         todosJugadores: todosJugadoresVisita,
-        genero: genero // Asegura que el género también se guarde en los datos del equipo
+        genero: genero
       };
 
       console.log("Guardando alineación", { equipo1: equipo1Data, equipo2: equipo2Data, genero, partidoId });
@@ -127,7 +110,7 @@ export default function Alineacion() {
       await set(ref(db, `partidos/${partidoId}/alineacion`), {
         equipo1: equipo1Data,
         equipo2: equipo2Data,
-        genero: genero, // Guarda el género a nivel de partido también
+        genero: genero,
       });
 
       await set(ref(db, `partidos/${partidoId}/marcador`), {
@@ -135,14 +118,14 @@ export default function Alineacion() {
         equipo2: 0
       });
 
-      console.log("🚀 Navegando a control (OK)", partidoId);
+      console.log("\uD83D\uDE80 Navegando a control (OK)", partidoId);
       navigate(`/control/${partidoId}`);
 
     } catch (error) {
-      alert("❌ ERROR al confirmar alineación: " + error.message);
+      alert("\u274C ERROR al confirmar alineación: " + error.message);
       console.error("Error al confirmar alineación:", error);
       const idFallback = partidoId || "debug-fallback";
-      console.log("⚠️ Forzando navegación a control:", idFallback);
+      console.log("\u26A0\uFE0F Forzando navegación a control:", idFallback);
       navigate(`/control/${idFallback}`);
     }
   };
@@ -187,13 +170,11 @@ export default function Alineacion() {
           >
             {jug.dorsal}
           </div>
-
           <img
             src={camisetaSrc}
             className="w-16 md:w-20 relative z-10"
             alt={`jugador-${tipo}`}
           />
-
           {jug.nombre && (
             <div className="absolute bottom-[-18px] font-barcelona text-[11px] text-white bg-black/80 px-2 py-[2px] rounded text-center z-20">
               {jug.nombre}
@@ -207,13 +188,8 @@ export default function Alineacion() {
   if (!equipoLocal || !equipoVisita) return null;
 
   return (
-    <div
-      className="min-h-screen bg-cover bg-center font-qatar text-white"
-      style={{ backgroundImage: `url('${import.meta.env.BASE_URL}img/fondoempro-horizontal.png')` }}
-    >
-
+    <div className="min-h-screen bg-cover bg-center font-qatar text-white" style={{ backgroundImage: `url('${import.meta.env.BASE_URL}img/fondoempro-horizontal.png')` }}>
       <Navbar />
-
       <h1 className="text-3xl sm:text-5xl font-bold text-center mt-6 text-yellow-400 drop-shadow">
         Alineación Inicial
       </h1>
@@ -224,7 +200,6 @@ export default function Alineacion() {
           {jugadoresLocal.map((jug, i) => renderJugador(jug, i, "local", getCamiseta(equipoLocal.nombre)))}
         </div>
 
-
         <div className="flex flex-col items-center gap-6">
           <img src="/img/logo-empro.png" alt="logo empro" className="w-24 md:w-32" />
           <div className="flex items-center gap-10">
@@ -232,10 +207,7 @@ export default function Alineacion() {
             <span className="text-white text-4xl font-black">V</span>
             <img src={equipoVisita.escudo} className="w-50 h-60 object-contain" alt="visita logo" />
           </div>
-          <button
-            onClick={() => navigate("/match")}
-            className="bg-white/80 text-[#7a0026] font-bold px-6 py-2 rounded-full hover:bg-white transition"
-          >
+          <button onClick={() => navigate("/match")} className="bg-white/80 text-[#7a0026] font-bold px-6 py-2 rounded-full hover:bg-white transition">
             ⬅ Volver a Equipos
           </button>
         </div>
@@ -244,14 +216,10 @@ export default function Alineacion() {
           <img src={`${import.meta.env.BASE_URL}img/cancha-vertical.svg`} alt="cancha visita" className="w-full h-full" />
           {jugadoresVisita.map((jug, i) => renderJugador(jug, i, "visita", getCamiseta(equipoVisita.nombre)))}
         </div>
-
       </div>
 
       <div className="flex justify-center mt-6 pb-10">
-        <button
-          onClick={confirmar}
-          className="bg-[#FFD700] text-[#7a0026] font-bold px-10 py-3 rounded-full hover:bg-yellow-300 transition text-xl shadow-lg"
-        >
+        <button onClick={confirmar} className="bg-[#FFD700] text-[#7a0026] font-bold px-10 py-3 rounded-full hover:bg-yellow-300 transition text-xl shadow-lg">
           Confirmar Alineación
         </button>
       </div>
@@ -268,7 +236,7 @@ export default function Alineacion() {
             dorsalColor={getColorDorsal((modalData.tipo === "local" ? equipoLocal.nombre : equipoVisita.nombre))}
             jugadoresActuales={modalData.jugadoresActuales}
             nombreEquipo={modalData.nombreEquipo}
-            generoPartido={modalData.generoPartido} // Pasa el género al modal del jugador
+            generoPartido={modalData.generoPartido}
           />
         )}
       </AnimatePresence>

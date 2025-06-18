@@ -56,10 +56,24 @@ export default function Match() {
   const iniciarPartido = async () => {
     const equipoLocal = equipos[indexLocal];
     const equipoVisita = equipos[indexVisita];
+
+    if (equipoLocal.nombre === equipoVisita.nombre) {
+      alert("El equipo local y visitante no pueden ser el mismo.");
+      return;
+    }
+
     await set(ref(db, `selecciones/equipoLocal`), equipoLocal);
     await set(ref(db, `selecciones/equipoVisita`), equipoVisita);
     await set(ref(db, `selecciones/generoPartido`), genero);
-    navigate("/alineacion");
+
+    navigate("/partido/alineacion", {
+      state: {
+        equipoLocal,
+        equipoVisita,
+        genero,
+        fecha: Date.now()
+      }
+    });
   };
 
   return (
