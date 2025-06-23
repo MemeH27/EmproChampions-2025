@@ -1,87 +1,89 @@
 import React, { useEffect, useState } from "react";
-import { ref, onValue } from "firebase/database";
-import { db } from "../firebase";
 import Navbar from "../components/Navbar";
+import { db } from "../firebase";
+import { ref, onValue } from "firebase/database";
 
 export default function Main() {
-  const [tabla, setTabla] = useState([]);
-  const [genero, setGenero] = useState("masculino");
+  const [tablaMasculina, setTablaMasculina] = useState([]);
+  const [tablaFemenina, setTablaFemenina] = useState([]);
+  const [generoActivo, setGeneroActivo] = useState("masculino");
 
   useEffect(() => {
-    const tablaRef = ref(db, `tablas/${genero}`);
-    const off = onValue(tablaRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const arreglo = Object.entries(data).map(([id, info]) => ({ id, ...info }));
-        const ordenada = arreglo.sort((a, b) => b.puntos - a.puntos);
-        setTabla(ordenada);
-      } else {
-        setTabla([]); // Limpiar la tabla si no hay datos
-      }
-    });
-    return () => off();
-  }, [genero]);
+    const cargarTabla = (genero, setter) => {
+      const tablaRef = ref(db, `tablas/${genero}`);
+      onValue(tablaRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const listaEquipos = Object.keys(data)
+            .map((key) => ({
+              nombre: key,
+              ...data[key],
+            }))
+            .sort((a, b) => b.puntos - a.puntos || (b.gf - b.gc) - (a.gf - a.gc));
+          setter(listaEquipos);
+        }
+      });
+    };
+    cargarTabla("masculino", setTablaMasculina);
+    cargarTabla("femenino", setTablaFemenina);
+  }, []);
+
+  const tablaActiva = generoActivo === "masculino" ? tablaMasculina : tablaFemenina;
 
   return (
-    <div
-      className="min-h-screen bg-cover bg-center text-white font-qatar"
-      style={{ backgroundImage: `url('${import.meta.env.BASE_URL}img/fondoempro-horizontal.png')` }}
-    >
-
+    <div className="w-full min-h-screen bg-cover bg-center text-white font-qatar" style={{ backgroundImage: "url('/img/fondoempro-horizontal.png')" }}>
       <Navbar />
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-5xl font-bold text-center text-yellow-400 drop-shadow-lg mb-6">
+          Tabla de Posiciones
+        </h1>
 
-      <div className="text-center py-6">
-        <img src={`${import.meta.env.BASE_URL}img/logo2.png`} alt="Tabla de Posiciones" className="mx-auto w-auto mb-4 px-8" />
-        <button
-          onClick={() => setGenero(genero === "masculino" ? "femenino" : "masculino")}
-          className="bg-yellow-400 text-[#7a0026] font-bold px-6 py-2 rounded-full"
-        >
-          Cambiar a {genero === "masculino" ? "Femenino" : "Masculino"}
-        </button>
-      </div>
+        <div className="flex justify-center mb-8 bg-black/30 rounded-full p-1 max-w-sm mx-auto">
+          <button onClick={() => setGeneroActivo("masculino")} className={`w-1/2 py-2 rounded-full font-bold transition-colors ${generoActivo === 'masculino' ? 'bg-yellow-400 text-black' : 'hover:bg-white/10'}`}>
+            Masculino
+          </button>
+          <button onClick={() => setGeneroActivo("femenino")} className={`w-1/2 py-2 rounded-full font-bold transition-colors ${generoActivo === 'femenino' ? 'bg-yellow-400 text-black' : 'hover:bg-white/10'}`}>
+            Femenino
+          </button>
+        </div>
 
-      <div className="overflow-x-auto px-4 pb-10">
-        {tabla.length === 0 ? (
-          <p className="text-center text-xl">No hay datos en la tabla de posiciones aún.</p>
-        ) : (
-          <table className="min-w-[600px] w-full border-collapse text-center">
-            <thead>
-              <tr className="bg-[#FFD700] text-[#7a0026]">
-                <th className="px-4 py-2 sticky left-0 bg-[#FFD700]">Equipo</th>
-                <th>PJ</th>
-                <th>PG</th>
-                <th>PE</th>
-                <th>PP</th>
-                <th>GF</th>
-                <th>GC</th>
-                <th>+/-</th>
-                <th>Puntos</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tabla.map((equipo, i) => (
-                <tr key={equipo.id} className="bg-white text-black border-b">
-                  <td className="flex items-center gap-2 font-bold sticky left-0 bg-white px-2 py-2">
-                    <img
-                      src={`${import.meta.env.BASE_URL}img/escudos/${equipo.logo}`}
-                      alt={equipo.nombre}
-                      className="w-4 h-4 object-contain mx-1"
-                    />
-                    {equipo.nombre} {/* <--- Corrección: Asegura que se muestre equipo.nombre */}
-                  </td>
-                  <td>{equipo.pj || 0}</td>
-                  <td>{equipo.pg || 0}</td>
-                  <td>{equipo.pe || 0}</td>
-                  <td>{equipo.pp || 0}</td>
-                  <td>{equipo.gf || 0}</td>
-                  <td>{equipo.gc || 0}</td>
-                  <td>{(equipo.gf || 0) - (equipo.gc || 0)}</td>
-                  <td className="font-extrabold text-[#7a0026]">{equipo.puntos || 0}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        <div className="bg-black/50 backdrop-blur-sm rounded-xl overflow-hidden shadow-2xl">
+          {/* Encabezados */}
+          <div className="grid grid-cols-10 md:grid-cols-12 text-center font-bold text-yellow-400 p-4 border-b border-yellow-400/20">
+            {/* CORRECCIÓN: Se cambia md:col-span-6 por md:col-span-5 */}
+            <div className="col-span-4 md:col-span-5 text-left pl-3">Club</div>
+            <div className="hidden md:block">PJ</div>
+            <div className="hidden md:block">PG</div>
+            <div className="hidden md:block">PE</div>
+            <div className="hidden md:block">PP</div>
+            <div className="col-span-2 md:col-span-1">GF</div>
+            <div className="col-span-2 md:col-span-1">GC</div>
+            <div className="col-span-2 md:col-span-1">Pts</div>
+          </div>
+
+          {/* Cuerpo de la tabla */}
+          <div>
+            {tablaActiva.map((equipo, index) => (
+              <div key={equipo.nombre} className="grid grid-cols-10 md:grid-cols-12 items-center text-center p-3 border-b border-gray-700/50 hover:bg-white/5 transition-colors">
+                
+                {/* CORRECCIÓN: Se cambia md:col-span-6 por md:col-span-5 para que la suma sea 12 */}
+                <div className="col-span-4 md:col-span-5 flex items-center gap-3 text-left">
+                  <span className="font-bold text-lg w-6 text-center text-gray-400">{index + 1}</span>
+                  <img src={`${import.meta.env.BASE_URL}img/escudos/${equipo.logo}`} alt={equipo.nombre} className="w-8 h-8 md:w-10 md:h-10 object-contain"/>
+                  <span className="font-bold text-base md:text-lg">{equipo.nombre}</span>
+                </div>
+
+                <div className="hidden md:block">{equipo.pj}</div>
+                <div className="hidden md:block">{equipo.pg}</div>
+                <div className="hidden md:block">{equipo.pe}</div>
+                <div className="hidden md:block">{equipo.pp}</div>
+                <div className="col-span-2 md:col-span-1">{equipo.gf}</div>
+                <div className="col-span-2 md:col-span-1">{equipo.gc}</div>
+                <div className="col-span-2 md:col-span-1 font-extrabold text-lg">{equipo.puntos}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
