@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ref, push, set, get } from "firebase/database";
 import { db } from "../firebase";
 import jugadoresData from "../data/jugadores.json";
+import Footer from '../components/Footer';
 
 export default function Alineacion() {
   const navigate = useNavigate();
@@ -23,14 +24,13 @@ export default function Alineacion() {
   const [confirmando, setConfirmando] = useState(false);
 
   useEffect(() => {
-    if (location.state && location.state.equipoLocal && location.state.equipoVisita && location.state.genero && location.state.fecha) {
-      console.log("[Alineacion.jsx] Datos recibidos de Match.jsx:", location.state);
+    if (location.state?.equipoLocal && location.state?.equipoVisita) {
       setPartidoConfig(location.state);
       setEquipoLocal(location.state.equipoLocal);
       setEquipoVisita(location.state.equipoVisita);
       setGenero(location.state.genero);
     } else {
-      console.warn("[Alineacion.jsx] No se recibieron datos de configuración del partido. Redirigiendo a configurar.");
+      console.warn("[Alineacion.jsx] No se recibieron datos de configuración del partido. Redirigiendo.");
       navigate("/partido/configurar");
     }
   }, [location.state, navigate]);
@@ -39,20 +39,15 @@ export default function Alineacion() {
     const jugador = tipo === "local" ? jugadoresLocal[index] : jugadoresVisita[index];
     const jugadoresActuales = tipo === "local" ? jugadoresLocal : jugadoresVisita;
     const nombreEquipo = tipo === "local" ? equipoLocal?.nombre : equipoVisita?.nombre;
-
     setModalData({ tipo, index, jugador, jugadoresActuales, nombreEquipo, generoPartido: genero });
   };
 
   const guardarJugador = (index, tipo, datos) => {
-    if (tipo === "local") {
-      const nuevos = [...jugadoresLocal];
-      nuevos[index] = datos;
-      setJugadoresLocal(nuevos);
-    } else {
-      const nuevos = [...jugadoresVisita];
-      nuevos[index] = datos;
-      setJugadoresVisita(nuevos);
-    }
+    const setter = tipo === "local" ? setJugadoresLocal : setJugadoresVisita;
+    const jugadores = tipo === "local" ? jugadoresLocal : jugadoresVisita;
+    const nuevos = [...jugadores];
+    nuevos[index] = datos;
+    setter(nuevos);
     setModalData(null);
   };
 
@@ -69,121 +64,62 @@ export default function Alineacion() {
       const nuevoPartidoRef = push(partidosRef);
       partidoId = nuevoPartidoRef.key;
 
-      let todosJugadoresLocal = [];
-      let todosJugadoresVisita = [];
+      const [snapLocalPlantilla, snapVisitaPlantilla] = await Promise.all([
+        get(ref(db, `plantillas/${genero.toLowerCase()}/${equipoLocal.nombre.toLowerCase()}`)),
+        get(ref(db, `plantillas/${genero.toLowerCase()}/${equipoVisita.nombre.toLowerCase()}`))
+      ]);
 
-      try {
-        const snapLocalPlantilla = await get(ref(db, `plantillas/${genero.toLowerCase()}/${equipoLocal.nombre.toLowerCase()}`));
-        const snapVisitaPlantilla = await get(ref(db, `plantillas/${genero.toLowerCase()}/${equipoVisita.nombre.toLowerCase()}`));
-
-        if (snapLocalPlantilla.exists()) todosJugadoresLocal = snapLocalPlantilla.val();
-        else todosJugadoresLocal = jugadoresData[equipoLocal.nombre.toLowerCase()] || [];
-
-        if (snapVisitaPlantilla.exists()) todosJugadoresVisita = snapVisitaPlantilla.val();
-        else todosJugadoresVisita = jugadoresData[equipoVisita.nombre.toLowerCase()] || [];
-      } catch (e) {
-        console.error("Error cargando plantillas de suplentes (Alineacion.jsx):", e);
-        todosJugadoresLocal = jugadoresData[equipoLocal.nombre.toLowerCase()] || [];
-        todosJugadoresVisita = jugadoresData[equipoVisita.nombre.toLowerCase()] || [];
-      }
-
+      const todosJugadoresLocal = snapLocalPlantilla.exists() ? snapLocalPlantilla.val() : (jugadoresData[equipoLocal.nombre.toLowerCase()] || []);
+      const todosJugadoresVisita = snapVisitaPlantilla.exists() ? snapVisitaPlantilla.val() : (jugadoresData[equipoVisita.nombre.toLowerCase()] || []);
+      
       const equipo1Data = {
         nombre: equipoLocal.nombre,
         logo: equipoLocal.escudo.split("/").pop(),
-        camisa: `camisa-${equipoLocal.nombre.toLowerCase().replace(/\s+/g, "-")}.png`,
         jugadores: jugadoresLocal.map((j) => ({ ...j, enJuego: true, haJugado: true })),
         todosJugadores: todosJugadoresLocal,
-        genero: genero
       };
 
       const equipo2Data = {
         nombre: equipoVisita.nombre,
         logo: equipoVisita.escudo.split("/").pop(),
-        camisa: `camisa-${equipoVisita.nombre.toLowerCase().replace(/\s+/g, "-")}.png`,
         jugadores: jugadoresVisita.map((j) => ({ ...j, enJuego: true, haJugado: true })),
         todosJugadores: todosJugadoresVisita,
-        genero: genero
       };
 
-      console.log("Guardando alineación", { equipo1: equipo1Data, equipo2: equipo2Data, genero, partidoId });
+      await set(ref(db, `partidos/${partidoId}/alineacion`), { equipo1: equipo1Data, equipo2: equipo2Data, genero: genero });
+      await set(ref(db, `partidos/${partidoId}/marcador`), { equipo1: 0, equipo2: 0 });
 
-      await set(ref(db, `partidos/${partidoId}/alineacion`), {
-        equipo1: equipo1Data,
-        equipo2: equipo2Data,
-        genero: genero,
-      });
-
-      await set(ref(db, `partidos/${partidoId}/marcador`), {
-        equipo1: 0,
-        equipo2: 0
-      });
-
-      console.log("\uD83D\uDE80 Navegando a control (OK)", partidoId);
-      navigate(`/control/${partidoId}`);
-
+      navigate(`/control-partido/${partidoId}`);
     } catch (error) {
-      alert("\u274C ERROR al confirmar alineación: " + error.message);
+      alert("❌ ERROR al confirmar alineación: " + error.message);
       console.error("Error al confirmar alineación:", error);
-      const idFallback = partidoId || "debug-fallback";
-      console.log("\u26A0\uFE0F Forzando navegación a control:", idFallback);
-      navigate(`/control/${idFallback}`);
     }
   };
 
-  const getCamiseta = (nombre) => {
-    const id = nombre.toLowerCase().replace(/\s+/g, "-");
-    return `${import.meta.env.BASE_URL}camisas/camisa-${id}.png`;
-  };
+  const getCamiseta = (nombre) => `${import.meta.env.BASE_URL}camisas/camisa-${nombre.toLowerCase().replace(/\s+/g, "-")}.png`;
+  const getColorDorsal = (nombre) => ["don bosco", "luz", "emprosaurios"].includes(nombre.toLowerCase()) ? "#000" : "#fff";
 
-  const getColorDorsal = (nombre) => {
-    const negros = ["don bosco", "luz", "emprosaurios"];
-    return negros.includes(nombre.toLowerCase()) ? "#000" : "#fff";
-  };
+  const posiciones = [{ top: "15%", left: "18%" }, { top: "15%", left: "62%" }, { top: "38%", left: "40%" }, { top: "55%", left: "17%" }, { top: "55%", left: "63%" }, { top: "74%", left: "40%" }];
 
-  const posiciones = [
-    { top: "15%", left: "18%" },
-    { top: "15%", left: "62%" },
-    { top: "38%", left: "40%" },
-    { top: "55%", left: "17%" },
-    { top: "55%", left: "63%" },
-    { top: "74%", left: "40%" },
-  ];
-
-  const renderJugador = (jug, i, tipo, camisetaSrc) => {
-    const seleccionado = modalData?.index === i && modalData?.tipo === tipo;
-    return (
-      <motion.div
-        key={i}
-        className="absolute cursor-pointer"
-        style={{ top: posiciones[i].top, left: posiciones[i].left, transform: 'translate(-50%, -50%)' }}
-        animate={seleccionado ? { scale: 1.5, rotate: 1.5 } : { scale: 1, rotate: 0 }}
-        transition={{ duration: 0.3 }}
-        onClick={() => abrirModal(i, tipo)}
-      >
-        <div className="relative w-fit flex flex-col items-center">
-          <div
-            className="absolute top-[12%] font-barcelona text-[24px] md:text-[30px] z-20 pointer-events-none"
-            style={{
-              color: getColorDorsal((tipo === 'local' ? equipoLocal?.nombre : equipoVisita?.nombre) || ''),
-              textShadow: '1px 1px 1px rgba(0,0,0,0.6)',
-            }}
-          >
-            {jug.dorsal}
-          </div>
-          <img
-            src={camisetaSrc}
-            className="w-16 md:w-20 relative z-10"
-            alt={`jugador-${tipo}`}
-          />
-          {jug.nombre && (
-            <div className="absolute bottom-[-18px] font-barcelona text-[11px] text-white bg-black/80 px-2 py-[2px] rounded text-center z-20">
-              {jug.nombre}
-            </div>
-          )}
+  const renderJugador = (jug, i, tipo, camisetaSrc) => (
+    <motion.div key={i} className="absolute cursor-pointer" style={{ top: posiciones[i].top, left: posiciones[i].left, transform: 'translate(-50%, -50%)' }}
+      animate={{ scale: modalData?.index === i && modalData?.tipo === tipo ? 1.5 : 1 }} transition={{ duration: 0.3 }} onClick={() => abrirModal(i, tipo)}
+    >
+      <div className="relative w-fit flex flex-col items-center">
+        <div className="absolute top-[12%] font-barcelona text-[24px] md:text-[30px] z-20 pointer-events-none"
+          style={{ color: getColorDorsal((tipo === 'local' ? equipoLocal?.nombre : equipoVisita?.nombre) || ''), textShadow: '1px 1px 1px rgba(0,0,0,0.6)' }}
+        >
+          {jug.dorsal}
         </div>
-      </motion.div>
-    );
-  };
+        <img src={camisetaSrc} className="w-16 md:w-20 relative z-10" alt={`jugador-${tipo}`} />
+        {jug.nombre && (
+          <div className="absolute bottom-[-18px] font-barcelona text-[11px] text-white bg-black/80 px-2 py-[2px] rounded text-center z-20">
+            {jug.nombre}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
 
   if (!equipoLocal || !equipoVisita) return null;
 
@@ -194,25 +130,28 @@ export default function Alineacion() {
         Alineación Inicial
       </h1>
 
-      <div className="flex flex-col lg:flex-row items-center justify-center gap-8 p-4 lg:p-6">
-        <div className="relative w-[320px] h-[540px] md:w-[400px] md:h-[640px]">
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-8 p-2 lg:p-6">
+        <div className="relative w-[300px] h-[510px] sm:w-[320px] sm:h-[540px] md:w-[400px] md:h-[640px]">
           <img src={`${import.meta.env.BASE_URL}img/cancha-vertical.svg`} alt="cancha local" className="w-full h-full" />
           {jugadoresLocal.map((jug, i) => renderJugador(jug, i, "local", getCamiseta(equipoLocal.nombre)))}
         </div>
 
-        <div className="flex flex-col items-center gap-6">
-          <img src="/img/logo-empro.png" alt="logo empro" className="w-24 md:w-32" />
-          <div className="flex items-center gap-10">
-            <img src={equipoLocal.escudo} className="w-50 h-60 object-contain" alt="local logo" />
-            <span className="text-white text-4xl font-black">V</span>
-            <img src={equipoVisita.escudo} className="w-50 h-60 object-contain" alt="visita logo" />
+        <div className="flex flex-col items-center gap-4 my-4 lg:my-0">
+          <img src="/img/logo-empro.png" alt="logo empro" className="w-20 md:w-32" />
+          <div className="flex items-center gap-4 md:gap-10">
+            {/* ===================================================================================== */}
+            {/* ===== CORRECCIÓN FINAL: Tamaños responsivos para los logos ===== */}
+            {/* ===================================================================================== */}
+            <img src={equipoLocal.escudo} className="w-20 h-20 md:w-24 md:h-24 object-contain" alt="local logo" />
+            <span className="text-white text-3xl md:text-4xl font-black">VS</span>
+            <img src={equipoVisita.escudo} className="w-20 h-20 md:w-24 md:h-24 object-contain" alt="visita logo" />
           </div>
-          <button onClick={() => navigate("/match")} className="bg-white/80 text-[#7a0026] font-bold px-6 py-2 rounded-full hover:bg-white transition">
-            ⬅ Volver a Equipos
+          <button onClick={() => navigate("/partido/configurar")} className="bg-white/80 text-[#7a0026] font-bold px-6 py-2 rounded-full hover:bg-white transition">
+            ⬅ Volver
           </button>
         </div>
 
-        <div className="relative w-[320px] h-[540px] md:w-[400px] md:h-[640px]">
+        <div className="relative w-[300px] h-[510px] sm:w-[320px] sm:h-[540px] md:w-[400px] md:h-[640px]">
           <img src={`${import.meta.env.BASE_URL}img/cancha-vertical.svg`} alt="cancha visita" className="w-full h-full" />
           {jugadoresVisita.map((jug, i) => renderJugador(jug, i, "visita", getCamiseta(equipoVisita.nombre)))}
         </div>
@@ -226,20 +165,13 @@ export default function Alineacion() {
 
       <AnimatePresence>
         {modalData && (
-          <ModalJugador
-            tipo={modalData.tipo}
-            index={modalData.index}
-            jugador={modalData.jugador}
-            onSave={guardarJugador}
-            onClose={() => setModalData(null)}
+          <ModalJugador {...modalData} onSave={guardarJugador} onClose={() => setModalData(null)}
             camiseta={getCamiseta((modalData.tipo === "local" ? equipoLocal.nombre : equipoVisita.nombre))}
             dorsalColor={getColorDorsal((modalData.tipo === "local" ? equipoLocal.nombre : equipoVisita.nombre))}
-            jugadoresActuales={modalData.jugadoresActuales}
-            nombreEquipo={modalData.nombreEquipo}
-            generoPartido={modalData.generoPartido}
           />
         )}
       </AnimatePresence>
+      <Footer />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { ref, set } from "firebase/database";
 import { db } from "../firebase";
+import Footer from '../components/Footer';
 
 // Equipos por género
 const equiposMasculino = [
@@ -190,6 +191,7 @@ export default function Match() {
           Siguiente
         </button>
       </div>
+      <Footer />
     </div>
   );
 }

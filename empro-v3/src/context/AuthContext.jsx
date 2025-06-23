@@ -1,70 +1,71 @@
-// empro-v3/src/context/AuthContext.jsx
-import { createContext, useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { ref, get, onValue } from "firebase/database"; // Funciones de Firebase Realtime Database
-import { auth, db } from "../firebase"; // MODIFICADO AQUÍ: cambia 'database' por 'db'
+import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
+import { auth, db } from "../firebase";
+import { ref, get } from "firebase/database"; // Se importa 'ref' y 'get'
 
-export const AuthContext = createContext();
+const authContext = createContext();
+
+export const useAuth = () => {
+  const context = useContext(authContext);
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
+  return context;
+};
 
 export function AuthProvider({ children }) {
-  const [usuario, setUsuario] = useState(null);
-  const [rol, setRol] = useState(null);
-  const [cargando, setCargando] = useState(true);
+  const [user, setUser] = useState(null);
+  const [rol, setRol] = useState(null); // Nuevo estado para guardar el rol
+  const [loading, setLoading] = useState(true);
+
+  const signup = (email, password) => createUserWithEmailAndPassword(auth, email, password);
+  const login = (email, password) => signInWithEmailAndPassword(auth, email, password);
+  const loginWithGoogle = () => {
+    const googleProvider = new GoogleAuthProvider();
+    return signInWithPopup(auth, googleProvider);
+  };
+  const logout = () => signOut(auth);
 
   useEffect(() => {
-    let unsubscribeAuth;
-    let unsubscribeRole;
-
-    unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-      console.log("🔥 [AuthContext] onAuthStateChanged - user:", user);
-      if (user) {
-        setUsuario(user);
-
-        if (unsubscribeRole) {
-          unsubscribeRole();
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        // Si hay un usuario, buscamos su rol en la base de datos
+        const userRef = ref(db, `usuarios/${currentUser.uid}`);
+        const snapshot = await get(userRef);
+        if (snapshot.exists()) {
+          setRol(snapshot.val().rol); // Guardamos el rol encontrado
+        } else {
+          setRol('usuario'); // Rol por defecto si no hay datos
         }
-
-        // Usa la variable 'db' importada correctamente
-        const userRoleRef = ref(db, `usuarios/${user.uid}/rol`); 
-        unsubscribeRole = onValue(userRoleRef, (snapshot) => {
-          if (snapshot.exists()) {
-            const userRole = snapshot.val();
-            setRol(userRole || "usuario");
-            console.log("Rol del usuario cargado desde DB:", userRole || "usuario");
-          } else {
-            setRol("usuario");
-            console.log("Nodo de usuario o rol no encontrado, rol por defecto: usuario");
-          }
-          setCargando(false);
-        }, (error) => {
-          console.error("Error al leer el rol desde la base de datos:", error);
-          setRol("usuario");
-          setCargando(false);
-        });
-
+        setUser(currentUser);
       } else {
-        if (unsubscribeRole) {
-          unsubscribeRole();
-        }
-        setUsuario(null);
+        // Si no hay usuario, limpiamos todo
+        setUser(null);
         setRol(null);
-        setCargando(false);
       }
+      setLoading(false);
     });
-
-    return () => {
-      if (unsubscribeAuth) {
-        unsubscribeAuth();
-      }
-      if (unsubscribeRole) {
-        unsubscribeRole();
-      }
-    };
+    return () => unsubscribe();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ usuario, rol, cargando }}>
+    <authContext.Provider
+      value={{
+        signup,
+        login,
+        user,
+        rol, // <-- AHORA PROVEEMOS EL ROL AL RESTO DE LA APP
+        logout,
+        loading,
+        loginWithGoogle,
+      }}
+    >
       {children}
-    </AuthContext.Provider>
+    </authContext.Provider>
   );
 }

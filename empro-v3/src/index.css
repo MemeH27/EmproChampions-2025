@@ -12,3 +12,37 @@
 .font-qatar {
   font-family: "Qatar2022", sans-serif;
 }
+
+/* Agrégalo al final de src/index.css */
+.bg-main-background {
+  background-image: url('/img/fondoempro-horizontal.png');
+}
+
+/* --- Animación para la banda de patrocinadores --- */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    /* Mueve el contenedor el 50% de su ancho, que es la longitud de la lista original de logos */
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  /* Aplica la animación 'scroll', que dura 40s, se repite de forma lineal e infinita */
+  animation: scroll 40s linear infinite;
+}
+
+.team-lineup-logo {
+  width: 32px;  /* 2rem */
+  height: 32px; /* 2rem */
+}
+
+@media (min-width: 768px) {
+  .team-lineup-logo {
+    width: 48px;  /* 3rem */
+    height: 48px; /* 3rem */
+  }
+}

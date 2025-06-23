@@ -1,7 +1,8 @@
-// ✅ Configuracion.jsx — corregido para modal de foto sin scroll infinito y con lápiz funcional
+// ✅ Configuracion.jsx — corregido para usar el hook useAuth()
 
-import React, { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../context/AuthContext";
+import React, { useEffect, useState } from "react";
+// --- CORRECCIÓN #1: Se importa 'useAuth' en lugar de 'AuthContext' ---
+import { useAuth } from "../context/AuthContext";
 import { ref as dbRef, get, update, set } from "firebase/database";
 import { auth, db } from "../firebase";
 import { signOut } from "firebase/auth";
@@ -10,9 +11,12 @@ import Navbar from "../components/Navbar";
 import ModalFoto from "../components/ModalFoto";
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
+import Footer from '../components/Footer';
 
 export default function Configuracion() {
-  const { usuario } = useContext(AuthContext);
+  // --- CORRECCIÓN #2: Se usa el hook useAuth() para obtener el usuario ---
+  const { user: usuario } = useAuth(); // Renombramos 'user' a 'usuario' para que coincida con tu código
+
   const [datos, setDatos] = useState(null);
   const [editable, setEditable] = useState(false);
   const [nombre, setNombre] = useState("");
@@ -36,7 +40,6 @@ export default function Configuracion() {
         const apellidoGoogle = displayName.split(" ")[1] || "";
         const fotoGoogle = usuario.photoURL || null;
 
-        // 🔥 NUEVO: buscar foto en localStorage primero
         const fotoLocal = localStorage.getItem(`fotoPerfil_${usuario.uid}`);
         const fotoFinal = fotoLocal || fotoGoogle || (snap.exists() && snap.val().foto) || null;
 
@@ -46,7 +49,7 @@ export default function Configuracion() {
           correo: usuario.email,
           rol: "usuario",
           iniciales: generarIniciales(nombreGoogle, apellidoGoogle),
-          foto: fotoFinal, // usa la foto final
+          foto: fotoFinal,
         };
 
         const requiere = !nombreGoogle || !apellidoGoogle;
@@ -121,7 +124,7 @@ export default function Configuracion() {
 
           <div className="mb-4 relative w-24 h-24 mx-auto">
             {datos.foto ? (
-              <img src={datos.foto} className="w-24 h-24 rounded-full object-cover" />
+              <img src={datos.foto} alt="Foto de perfil" className="w-24 h-24 rounded-full object-cover" />
             ) : (
               <div className="w-24 h-24 rounded-full bg-[#7a0026] text-white text-3xl flex items-center justify-center">
                 {generarIniciales(nombre, apellido) || "U"}
@@ -131,6 +134,7 @@ export default function Configuracion() {
               type="button"
               onClick={() => setModalFoto(true)}
               className="absolute bottom-0 right-0 bg-yellow-400 text-black rounded-full p-1 shadow-md hover:bg-yellow-500"
+              aria-label="Editar foto de perfil"
             >
               ✏️
             </button>
@@ -184,7 +188,7 @@ export default function Configuracion() {
       </div>
 
       <Modal open={modalCerrar} onClose={() => setModalCerrar(false)}>
-        <Box className="bg-white p-6 rounded-md shadow-md w-full max-w-sm mx-auto mt-40 text-center">
+        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4, textAlign: 'center' }}>
           <h2 className="text-xl font-bold mb-4 text-black">¿Cerrar sesión?</h2>
           <div className="flex justify-center gap-4">
             <button
@@ -203,13 +207,13 @@ export default function Configuracion() {
         </Box>
       </Modal>
 
-      {/* Modal de edición de foto */}
       <ModalFoto
         open={modalFoto}
         onClose={() => setModalFoto(false)}
         usuario={usuario}
         onUploadSuccess={actualizarFoto}
       />
+      <Footer />
     </div>
   );
 }

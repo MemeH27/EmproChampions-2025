@@ -1,52 +1,32 @@
 import React from "react";
 
-export default function Cancha({ equipo1, equipo2 }) {
+export default function Cancha({ children }) {
   return (
-    <div className="flex justify-center mt-6 px-4">
-      <div
-        className="w-full max-w-5xl h-[500px] bg-no-repeat bg-contain bg-center flex justify-between px-2"
-        style={{ backgroundImage: `url('${import.meta.env.BASE_URL}img/cancha-vertical.svg')` }}
-      >
+    <div className="relative w-full max-w-4xl mx-auto mt-4 md:mt-8">
+      <img src="/img/cancha.png" alt="Cancha de futbol" className="w-full h-auto" />
 
-        {/* Lado izquierdo - equipo 1 */}
-        <div className="w-1/2 flex flex-col items-center justify-around">
-          {equipo1.jugadores
-            .filter((jug) => jug.enJuego)
-            .map((jugador, i) => (
-              <div key={i} className="relative text-center">
-                <img
-                  src={`${import.meta.env.BASE_URL}camisas/${equipo1.camisa}`}
-                  alt="camisa"
-                  className="w-14 mx-auto"
-                />
+      {/* Usamos una cuadrícula de 3 columnas para alinear todo perfectamente */}
+      <div className="absolute inset-0 grid grid-cols-3 items-start p-2 gap-2">
 
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white font-bold text-sm drop-shadow">
-                  {jugador.dorsal}
-                </div>
-                <div className="text-white text-xs mt-1">{jugador.nombre}</div>
-              </div>
-            ))}
+        {/* Columna Izquierda para el Equipo 1 */}
+        <div className="text-white">
+          {children[0]}
         </div>
 
-        {/* Lado derecho - equipo 2 */}
-        <div className="w-1/2 flex flex-col items-center justify-around">
-          {equipo2.jugadores
-            .filter((jug) => jug.enJuego)
-            .map((jugador, i) => (
-              <div key={i} className="relative text-center">
-                <img
-                  src={`${import.meta.env.BASE_URL}camisas/${equipo2.camisa}`}
-                  alt="camisa"
-                  className="w-14 mx-auto"
-                />
-
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white font-bold text-sm drop-shadow">
-                  {jugador.dorsal}
-                </div>
-                <div className="text-white text-xs mt-1">{jugador.nombre}</div>
-              </div>
-            ))}
+        {/* Columna Central para el Logo de Empro */}
+        <div className="flex justify-center items-center h-full">
+          <img 
+            src={`${import.meta.env.BASE_URL}img/logo-empro.png`} 
+            alt="Logo Empro" 
+            className="w-16 h-16 md:w-24 md:h-24 opacity-80" 
+          />
         </div>
+
+        {/* Columna Derecha para el Equipo 2 */}
+        <div className="text-white">
+          {children[1]}
+        </div>
+
       </div>
     </div>
   );

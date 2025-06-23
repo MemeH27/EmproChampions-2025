@@ -1,17 +1,19 @@
-// empro-v3/src/components/Navbar.jsx
-
-import { useState, useContext } from "react";
+import { useState } from "react"; // Se elimina 'useContext' porque ya no se usa directamente
 import { Link, useLocation } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
+// --- CORRECCIÓN #1: Se importa el hook 'useAuth' en lugar de 'AuthContext' ---
+import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const { usuario, rol, cargando } = useContext(AuthContext); // 'rol' se obtiene del AuthContext
+  // --- CORRECCIÓN #2: Se usa el hook 'useAuth()' para obtener los datos ---
+  const { user: usuario, rol, loading: cargando } = useAuth();
+  
   const location = useLocation();
 
   // No mostramos el Navbar en las páginas de login o registro,
-  // o si el usuario aún está cargando o no está autenticado.
-  if (cargando || !usuario || location.pathname === "/login" || location.pathname === "/registro") {
+  // o si el usuario aún está cargando.
+  // Se quita la condición de !usuario para que el Navbar aparezca aunque no haya sesión (y muestre el botón de Login)
+  if (cargando || location.pathname === "/login" || location.pathname === "/registro") {
     return null;
   }
 

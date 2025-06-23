@@ -1,59 +1,45 @@
-import React, { useState } from "react";
-import jugadoresPorEquipo from "../data/jugadores.json";
+import React from 'react';
 
-export default function AlineacionEquipo({ equipo, onAlineacionLista }) {
-  const jugadores = jugadoresPorEquipo[equipo] || [];
-  // Array de nombres elegidos (máx 6)
-  const [titulares, setTitulares] = useState(Array(6).fill(""));
-  
-  // Cuando seleccionas un jugador, actualizas esa posición de titular
-  const handleSelect = (i, value) => {
-    // Evita repetir jugador
-    const nuevos = [...titulares];
-    nuevos[i] = value;
-    setTitulares(nuevos);
-    if (onAlineacionLista) {
-      // Llama callback con titulares y suplentes (objetos completos)
-      const titularesObj = nuevos.map(n => jugadores.find(j => j.nombre === n)).filter(Boolean);
-      const suplentesObj = jugadores.filter(j => !nuevos.includes(j.nombre));
-      onAlineacionLista({ titulares: titularesObj, suplentes: suplentesObj });
-    }
-  };
+export default function AlineacionEquipo({ equipo, lado }) {
+  if (!equipo || !equipo.jugadores) {
+    return <div>Cargando equipo...</div>;
+  }
 
-  // Jugadores disponibles por cada select (filtra los que ya están elegidos en otros selects)
-  const disponibles = (indiceActual) =>
-    jugadores.filter(j =>
-      !titulares.includes(j.nombre) || titulares[indiceActual] === j.nombre
-    );
+  const logoSrc = `${import.meta.env.BASE_URL}img/escudos/${equipo.logo}`;
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <h2 className="text-xl font-bold text-[#7a0026] mb-3">Titulares</h2>
-      {titulares.map((nombre, i) => (
-        <div key={i} className="mb-2 flex items-center gap-2">
-          <span className="font-semibold text-gray-700">{i + 1}.</span>
-          <select
-            className="flex-1 px-3 py-2 border border-[#7a0026] rounded"
-            value={nombre}
-            onChange={e => handleSelect(i, e.target.value)}
+    // min-w-0 es CRÍTICO para forzar que el contenido se encoja y no se desborde.
+    <div className={`flex flex-col min-w-0`}>
+      
+      {/* ===== ENCABEZADO DE EQUIPO (VERSIÓN ULTRA-COMPACTA) ===== */}
+      <div className="flex items-center gap-1.5 bg-black/50 p-1 rounded-lg mb-2 w-full">
+        {lado === 'izquierda' && 
+            // Se reduce el logo al mínimo tamaño razonable en móvil (w-8)
+            <img src={logoSrc} alt={equipo.nombre} className="w-2 h-2 object-contain flex-shrink-0" />
+        }
+
+        {lado === 'derecha' && 
+            <img src={logoSrc} alt={equipo.nombre} className="w-8 h-8 object-contain flex-shrink-0" />
+        }
+      </div>
+
+      {/* ===== LISTA DE JUGADORES (VERSIÓN ULTRA-COMPACTA) ===== */}
+      <div className="space-y-1 w-full">
+        {equipo.jugadores.filter(j => j.enJuego).map((jugador) => (
+          <div 
+            key={jugador.nombre}
+            // Se reduce el padding para ahorrar espacio
+            className={`bg-black/60 p-1 rounded-md text-white text-xs w-full`}
           >
-            <option value="">Selecciona un jugador</option>
-            {disponibles(i).map(j => (
-              <option key={j.dorsal + j.nombre} value={j.nombre}>
-                {j.nombre} (#{j.dorsal})
-              </option>
-            ))}
-          </select>
-        </div>
-      ))}
-      <h2 className="text-lg font-bold text-[#7a0026] mt-6 mb-2">Suplentes</h2>
-      <ul className="list-disc ml-6 text-gray-800">
-        {jugadores
-          .filter(j => !titulares.includes(j.nombre))
-          .map(j => (
-            <li key={j.nombre}>{j.nombre} (#{j.dorsal})</li>
-          ))}
-      </ul>
+            <div className={`flex items-center gap-1.5`}>
+               {/* Se le da un ancho fijo al dorsal para que el nombre tenga espacio flexible */}
+              <span className="font-bold opacity-70 w-6 text-center flex-shrink-0">{jugador.dorsal}</span>
+              {/* 'truncate' es la clave para que nombres largos no rompan el diseño */}
+              <span className="truncate">{jugador.nombre}</span>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

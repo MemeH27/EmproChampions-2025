@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import { db } from "../firebase";
 import { ref, onValue } from "firebase/database";
+import SponsorBanner from '../components/SponsorBanner';
+import Footer from '../components/Footer';
 
 export default function Main() {
   const [tablaMasculina, setTablaMasculina] = useState([]);
@@ -31,7 +33,7 @@ export default function Main() {
   const tablaActiva = generoActivo === "masculino" ? tablaMasculina : tablaFemenina;
 
   return (
-    <div className="w-full min-h-screen bg-cover bg-center text-white font-qatar" style={{ backgroundImage: "url('/img/fondoempro-horizontal.png')" }}>
+    <div className="w-full min-h-screen bg-cover bg-center text-white font-qatar bg-main-background">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-5xl font-bold text-center text-yellow-400 drop-shadow-lg mb-6">
@@ -85,6 +87,9 @@ export default function Main() {
           </div>
         </div>
       </div>
+      <SponsorBanner />
+      <Footer />
     </div>
+    
   );
 }
