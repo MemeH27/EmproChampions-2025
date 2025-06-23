@@ -8,7 +8,7 @@ import {
   signInWithPopup,
 } from "firebase/auth";
 import { auth, db } from "../firebase";
-import { ref, get } from "firebase/database"; // Se importa 'ref' y 'get'
+import { ref, get } from "firebase/database";
 
 const authContext = createContext();
 
@@ -20,31 +20,42 @@ export const useAuth = () => {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [rol, setRol] = useState(null); // Nuevo estado para guardar el rol
+  const [rol, setRol] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const signup = (email, password) => createUserWithEmailAndPassword(auth, email, password);
   const login = (email, password) => signInWithEmailAndPassword(auth, email, password);
+  
   const loginWithGoogle = () => {
     const googleProvider = new GoogleAuthProvider();
+    // ==================================================================
+    // ========= INICIO DE LA CORRECCIÓN ================================
+    // ==================================================================
+    // Esta línea le dice a Google que SIEMPRE muestre la pantalla
+    // de selección de cuenta, en lugar de iniciar sesión automáticamente.
+    googleProvider.setCustomParameters({
+      prompt: 'select_account'
+    });
+    // ================================================================
+    // ================= FIN DE LA CORRECCIÓN =========================
+    // ================================================================
     return signInWithPopup(auth, googleProvider);
   };
+
   const logout = () => signOut(auth);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        // Si hay un usuario, buscamos su rol en la base de datos
         const userRef = ref(db, `usuarios/${currentUser.uid}`);
         const snapshot = await get(userRef);
         if (snapshot.exists()) {
-          setRol(snapshot.val().rol); // Guardamos el rol encontrado
+          setRol(snapshot.val().rol);
         } else {
-          setRol('usuario'); // Rol por defecto si no hay datos
+          setRol('usuario');
         }
         setUser(currentUser);
       } else {
-        // Si no hay usuario, limpiamos todo
         setUser(null);
         setRol(null);
       }
@@ -59,7 +70,7 @@ export function AuthProvider({ children }) {
         signup,
         login,
         user,
-        rol, // <-- AHORA PROVEEMOS EL ROL AL RESTO DE LA APP
+        rol,
         logout,
         loading,
         loginWithGoogle,
