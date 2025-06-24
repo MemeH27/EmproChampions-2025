@@ -16,7 +16,7 @@ export default function Footer() {
                 Evento deportivo de las Comunidades del Centro Guia Santa Rosa de Lima con el objetivo de unir los lazos de amistad y fomentar los buenos valores inculcados en el movimiento.
             </p>
             <p className="mt-6 text-lg italic text-yellow-400">
-                "Porque un verdadero Emproista es aquel que ve el trabajo no como una carga, sino como una necesidad"
+                "Porque un verdadero Emproista es aquel que ve el trabajo no como una carga, sino como un privilegio"
             </p>
         </div>
 
