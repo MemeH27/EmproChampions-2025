@@ -1,14 +1,15 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   onAuthStateChanged,
   signOut,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword
 } from "firebase/auth";
 import { auth, db } from "../firebase";
-import { ref, get } from "firebase/database";
+// Se añade 'update' para poder actualizar el rol si es necesario
+import { ref, get, set, update } from "firebase/database"; 
 
 const authContext = createContext();
 
@@ -25,37 +26,54 @@ export function AuthProvider({ children }) {
 
   const signup = (email, password) => createUserWithEmailAndPassword(auth, email, password);
   const login = (email, password) => signInWithEmailAndPassword(auth, email, password);
-  
+  const logout = () => signOut(auth);
+
   const loginWithGoogle = () => {
     const googleProvider = new GoogleAuthProvider();
-    // ==================================================================
-    // ========= INICIO DE LA CORRECCIÓN ================================
-    // ==================================================================
-    // Esta línea le dice a Google que SIEMPRE muestre la pantalla
-    // de selección de cuenta, en lugar de iniciar sesión automáticamente.
-    googleProvider.setCustomParameters({
-      prompt: 'select_account'
-    });
-    // ================================================================
-    // ================= FIN DE LA CORRECCIÓN =========================
-    // ================================================================
+    googleProvider.setCustomParameters({ prompt: 'select_account' });
     return signInWithPopup(auth, googleProvider);
   };
-
-  const logout = () => signOut(auth);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
+        // --- LÓGICA DE ROLES MEJORADA ---
+
+        // 1. Determina el rol correcto basado en el email SIEMPRE
+        const correosAdmin = [
+          "yayirobe2305@gmail.com",
+          "gersonespino@gmail.com",
+          "andiescobar8@gmail.com",
+          "rodriguezmerary42@gmail.com"
+        ];
+        const rolCorrecto = correosAdmin.includes(currentUser.email) ? 'admin' : 'usuario';
+        
+        // 2. Actualiza el estado de la aplicación inmediatamente
+        setRol(rolCorrecto);
+        setUser(currentUser);
+
+        // 3. Verifica y sincroniza la base de datos en segundo plano
         const userRef = ref(db, `usuarios/${currentUser.uid}`);
         const snapshot = await get(userRef);
-        if (snapshot.exists()) {
-          setRol(snapshot.val().rol);
+
+        if (!snapshot.exists()) {
+          // Si el perfil no existe, créalo con el rol correcto
+          const nuevoPerfil = {
+            correo: currentUser.email,
+            rol: rolCorrecto,
+            nombre: currentUser.displayName?.split(" ")[0] || "",
+            apellido: currentUser.displayName?.split(" ")[1] || "",
+          };
+          await set(userRef, nuevoPerfil);
         } else {
-          setRol('usuario');
+          // Si el perfil ya existe, asegúrate de que el rol sea el correcto
+          const perfilExistente = snapshot.val();
+          if (perfilExistente.rol !== rolCorrecto) {
+            await update(userRef, { rol: rolCorrecto });
+          }
         }
-        setUser(currentUser);
       } else {
+        // Si no hay usuario, limpia todo
         setUser(null);
         setRol(null);
       }
@@ -65,17 +83,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <authContext.Provider
-      value={{
-        signup,
-        login,
-        user,
-        rol,
-        logout,
-        loading,
-        loginWithGoogle,
-      }}
-    >
+    <authContext.Provider value={{ user, rol, loading, signup, login, logout, loginWithGoogle }}>
       {children}
     </authContext.Provider>
   );
