@@ -21,6 +21,7 @@ import Alineacion from './pages/Alineacion';
 import Configuracion from './pages/Configuracion';
 import ToastNotificacion from './components/ToastNotificacion';
 import EditarPartido from './pages/EditarPartido';
+import Calendario from './pages/Calendario';
 
 // Componente para rutas protegidas
 function ProtectedRoute({ children }) {
@@ -126,6 +127,7 @@ function App() {
           <Route path="/configuracion" element={<ProtectedRoute><Configuracion /></ProtectedRoute>} />
           <Route path="/partido/editar/:partidoId" element={<AdminRoute><EditarPartido /></AdminRoute>} />
           <Route path="*" element={<div>Página no encontrada</div>} />
+          <Route path="/calendario" element={<ProtectedRoute><Calendario /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

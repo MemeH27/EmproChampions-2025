@@ -7,7 +7,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   // --- CORRECCIÓN #2: Se usa el hook 'useAuth()' para obtener los datos ---
   const { user: usuario, rol, loading: cargando } = useAuth();
-  
+
   const location = useLocation();
 
   // No mostramos el Navbar en las páginas de login o registro,
@@ -53,8 +53,12 @@ export default function Navbar() {
             <Link to="/historial" className="hover:text-yellow-400" onClick={() => setOpen(false)}>Historial</Link>
           </li>
           <li className="p-3 md:p-0 text-center">
+            <Link to="/calendario" className="hover:text-yellow-400" onClick={() => setOpen(false)}>Calendario</Link>
+          </li>
+          <li className="p-3 md:p-0 text-center">
             <Link to="/configuracion" className="hover:text-yellow-400" onClick={() => setOpen(false)}>Cuenta</Link>
           </li>
+
           {/* Mostrar "Nuevo Partido" solo si es admin o superadmin */}
           {isAdmin && (
             <li className="p-3 md:p-0 text-center">

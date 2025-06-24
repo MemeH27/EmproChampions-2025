@@ -1,6 +1,36 @@
 {
   "rules": {
-    ".read": "auth != null",
-    ".write": "auth != null"
+    "partidos": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "tablas": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "goleadores": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "historial": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "goleadoresDetalles": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "calendario": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "plantillas": {
+      ".read": true,
+      ".write": "auth != null"
+    },
+    "usuarios": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
   }
 }
