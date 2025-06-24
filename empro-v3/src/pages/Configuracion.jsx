@@ -7,6 +7,7 @@ import { ref as dbRef, get, update, set } from "firebase/database";
 import { auth, db } from "../firebase";
 import { signOut } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import { initialData } from '../data/initialData';
 import Navbar from "../components/Navbar";
 import ModalFoto from "../components/ModalFoto";
 import Modal from "@mui/material/Modal";
@@ -30,6 +31,7 @@ export default function Configuracion() {
   const generarIniciales = (n, a) => {
     return (n?.charAt(0).toUpperCase() || "") + (a?.charAt(0).toUpperCase() || "");
   };
+
 
   useEffect(() => {
     if (usuario) {
@@ -81,7 +83,20 @@ export default function Configuracion() {
       });
     }
   }, [usuario]);
-
+  
+  const handleSeedDatabase = async () => {
+    if (window.confirm("¿Estás seguro? Esta acción sobreescribirá los datos de /calendario y /plantillas en la base de datos.")) {
+      try {
+        const dbRef = ref(db);
+        // 'update' es más seguro que 'set' porque no borra otros nodos de la raíz
+        await update(dbRef, initialData);
+        alert("¡Éxito! La base de datos ha sido inicializada con los datos del calendario y las plantillas.");
+      } catch (error) {
+        alert("Error al inicializar la base de datos: " + error.message);
+        console.error("Error en handleSeedDatabase: ", error);
+      }
+    }
+  };
 
   const guardarCambios = async () => {
     if (!usuario) return;

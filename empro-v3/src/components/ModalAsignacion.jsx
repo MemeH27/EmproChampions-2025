@@ -1,51 +1,72 @@
 import React, { useState, useEffect } from 'react';
-import { ref, get, update } from 'firebase/database';
+// Se añade 'get' y 'set' para el nuevo método de guardado
+import { ref, get, set } from 'firebase/database';
 import { db } from '../firebase';
+import { initialData } from '../data/initialData';
 
 export default function ModalAsignacion({ open, onClose, letra, genero, asignacionActual }) {
   const [equiposDisponibles, setEquiposDisponibles] = useState([]);
-  const [equipoSeleccionado, setEquipoSeleccionado] = useState(asignacionActual || '');
+  const [equipoSeleccionado, setEquipoSeleccionado] = useState('');
   const [cargando, setCargando] = useState(false);
 
   useEffect(() => {
     if (open) {
-      // ==================================================================
-      // ========= INICIO DE LA CORRECCIÓN ================================
-      // ==================================================================
-      // Se cambia la ruta para leer la lista de equipos desde las plantillas,
-      // que es la fuente de datos correcta y completa.
-      const plantillasRef = ref(db, `plantillas/${genero}`);
-      get(plantillasRef).then((snapshot) => {
-        if (snapshot.exists()) {
-          // Obtenemos los nombres de los equipos, que son las claves en este nodo
-          setEquiposDisponibles(Object.keys(snapshot.val()));
-        }
-      });
-      // ================================================================
-      // ================= FIN DE LA CORRECCIÓN =========================
-      // ================================================================
+      const plantillasParaGenero = initialData.plantillas[genero];
+      if (plantillasParaGenero) {
+        setEquiposDisponibles(Object.keys(plantillasParaGenero));
+      }
       setEquipoSeleccionado(asignacionActual);
     }
   }, [open, genero, asignacionActual]);
 
+  // ==================================================================
+  // ========= INICIO DE LA NUEVA FUNCIÓN DE GUARDADO =================
+  // ==================================================================
   const handleSave = async () => {
     if (!equipoSeleccionado) {
       alert("Por favor, selecciona un equipo.");
       return;
     }
     setCargando(true);
-    const asignacionRef = ref(db, `calendario/${genero}/asignaciones`);
+    
+    // 1. Apuntamos al nodo del género completo (ej: /calendario/masculino)
+    const generoRef = ref(db, `calendario/${genero}`);
+
     try {
-      // Usamos update para modificar solo la letra correspondiente
-      await update(asignacionRef, { [letra]: equipoSeleccionado });
+      // 2. LEEMOS el estado actual completo de ese nodo desde la base de datos
+      const snapshot = await get(generoRef);
+      
+      let calendarioActual;
+      if (snapshot.exists()) {
+        calendarioActual = snapshot.val();
+      } else {
+        // Si no hay nada en la base de datos, usamos los datos iniciales como base
+        calendarioActual = initialData.calendario[genero];
+      }
+      
+      // 3. MODIFICAMOS la asignación en la copia local que acabamos de leer
+      // Nos aseguramos de que el objeto 'asignaciones' exista
+      if (!calendarioActual.asignaciones) {
+        calendarioActual.asignaciones = {};
+      }
+      calendarioActual.asignaciones[letra] = equipoSeleccionado;
+
+      // 4. REEMPLAZAMOS todo el nodo en la base de datos con nuestra versión modificada y completa
+      await set(generoRef, calendarioActual);
+
       alert("Asignación guardada correctamente.");
       onClose();
+
     } catch (error) {
       alert("Error al guardar: " + error.message);
+      console.error("Error en handleSave:", error);
     } finally {
       setCargando(false);
     }
   };
+  // ================================================================
+  // ================= FIN DE LA NUEVA FUNCIÓN ======================
+  // ================================================================
 
   if (!open) return null;
 
