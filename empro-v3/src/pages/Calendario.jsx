@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ref, onValue, off, set } from 'firebase/database';
-import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/functions';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ModalAsignacion from '../components/ModalAsignacion';
@@ -35,10 +35,8 @@ export default function Calendario() {
         const calendarioInicial = initialData.calendario[generoActivo];
         if (calendarioInicial) {
           await set(ref(db, `calendario/${generoActivo}`), {
-            partidos: {
-              asignaciones: {},
-              partidos: calendarioInicial,
-            }
+            asignaciones: {},
+            partidos: calendarioInicial,
           });
           setHasUploadedInitialData(true);
         }
@@ -68,7 +66,7 @@ export default function Calendario() {
   };
 
   const handleGuardarFinal = async ({ granFinal, tercerLugar }) => {
-    const finalesRef = ref(db, `calendario/${generoActivo}/partidos/partidos/finales`);
+    const finalesRef = ref(db, `calendario/${generoActivo}/partidos/finales`);
     await set(finalesRef, [
       {
         cancha: "2",
@@ -88,13 +86,14 @@ export default function Calendario() {
     alert("Final guardada con éxito");
   };
 
-  const calendario = liveData.calendario?.partidos || {};
+  const calendario = liveData.calendario || {};
+  const asignaciones = calendario.asignaciones || {};
+  const partidos = calendario.partidos || {};
   const plantillas = initialData.plantillas[generoActivo] || {};
   const equiposInfo = liveData.equiposInfo || {};
-  const asignaciones = calendario.asignaciones || {};
 
   const equiposSemis = [...new Set(
-    (calendario.partidos?.semifinales || [])
+    (partidos?.semifinales || [])
       .flatMap(p => [p.equipo1, p.equipo2])
       .map((e) => asignaciones[e] || e)
       .filter((nombre) => nombre && !nombre.toLowerCase().includes('lugar') && nombre !== 'undefined')
@@ -128,12 +127,12 @@ export default function Calendario() {
           ))}
         </div>
 
-        {!calendario.partidos ? (
+        {!partidos || Object.keys(partidos).length === 0 ? (
           <p className="text-center">Cargando...</p>
         ) : (
           <div className="max-w-4xl mx-auto">
             <div className="space-y-8">
-              {Object.entries(calendario.partidos).map(([key, jornada]) => (
+              {Object.entries(partidos).map(([key, jornada]) => (
                 <div key={key}>
                   <div className="flex justify-between items-center mb-4 border-b-2 border-yellow-400/20 pb-2">
                     <h2 className="text-2xl font-bold text-yellow-300">{formatGroupName(key)}</h2>
@@ -144,6 +143,44 @@ export default function Calendario() {
                         className="bg-red-600 text-white font-bold px-3 py-1 rounded-lg text-sm hover:bg-red-500"
                       >
                         Seleccionar Finalistas
+                      </button>
+                    )}
+
+                    {rol === 'admin' && key === 'semifinales' && (
+                      <button
+                        onClick={async () => {
+                          const tabla = Object.entries(equiposInfo)
+                            .sort(([, a], [, b]) => b.puntos - a.puntos)
+                            .slice(0, 4);
+
+                          if (tabla.length < 4) {
+                            alert("Se necesitan al menos 4 equipos para generar las semifinales.");
+                            return;
+                          }
+
+                          const [eq1, eq2, eq3, eq4] = tabla.map(([nombre]) => nombre);
+                          const semifinalesRef = ref(db, `calendario/${generoActivo}/partidos/semifinales`);
+
+                          await set(semifinalesRef, [
+                            {
+                              cancha: "1",
+                              equipo1: eq1,
+                              equipo2: eq4,
+                              fecha: "Domingo 29 Jun - 03:00 PM"
+                            },
+                            {
+                              cancha: "2",
+                              equipo1: eq2,
+                              equipo2: eq3,
+                              fecha: "Domingo 29 Jun - 03:00 PM"
+                            }
+                          ]);
+
+                          alert("Semifinales generadas correctamente.");
+                        }}
+                        className="bg-green-600 text-white font-bold px-3 py-1 rounded-lg text-sm hover:bg-green-500"
+                      >
+                        Generar Semifinales
                       </button>
                     )}
                   </div>
@@ -181,7 +218,6 @@ export default function Calendario() {
       />
 
       <ModalSeleccionFinal open={modalFinalOpen} onClose={() => setModalFinalOpen(false)} genero={generoActivo} />
-        
     </div>
   );
 }
