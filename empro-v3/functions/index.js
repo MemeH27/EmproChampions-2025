@@ -1,4 +1,4 @@
-const {onCall} = require("firebase-functions/v2/https");
+const {onCall, HttpsError} = require("firebase-functions/v2/https");
 const {onValueWritten} = require("firebase-functions/v2/database");
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
@@ -56,20 +56,27 @@ exports.actualizarTablaDeGoleadores = onValueWritten(
 // ====== FUNCIÓN #3: Generar Fases Finales (Ya estaba bien) ========
 // ==================================================================
 exports.generarFasesFinales = onCall(async (request) => {
+  // La lógica de esta verificación está bien, el problema es cómo se lanza el error.
   if (request.auth?.token?.rol !== "admin" && request.auth?.token?.rol !== "superadmin") {
-    throw new functions.https.HttpsError("permission-denied", "Solo un administrador puede ejecutar esta acción.");
+    // CAMBIO AQUÍ: Usa HttpsError directamente
+    throw new HttpsError("permission-denied", "Solo un administrador puede ejecutar esta acción.");
   }
+
   const genero = request.data.genero;
   if (!genero) {
-    throw new functions.https.HttpsError("invalid-argument", "Se debe especificar el género.");
+    // CAMBIO AQUÍ: Usa HttpsError directamente
+    throw new HttpsError("invalid-argument", "Se debe especificar el género.");
   }
+
   const db = admin.database();
   const tablasRef = db.ref(`/tablas/${genero}`);
   const calendarioRef = db.ref(`/calendario/${genero}/partidos`);
+
   try {
     const tablasSnap = await tablasRef.once("value");
     if (!tablasSnap.exists()) {
-      throw new functions.https.HttpsError("not-found", "La tabla de posiciones está vacía.");
+      // CAMBIO AQUÍ: Usa HttpsError directamente
+      throw new HttpsError("not-found", "La tabla de posiciones está vacía.");
     }
     const tablas = tablasSnap.val();
     const equiposOrdenados = Object.values(tablas).sort((a, b) => {
@@ -79,19 +86,31 @@ exports.generarFasesFinales = onCall(async (request) => {
       if (difGolesB !== difGolesA) return difGolesB - difGolesA;
       return (b.gf || 0) - (a.gf || 0);
     });
+
     if (equiposOrdenados.length < 4) {
-      throw new functions.https.HttpsError("failed-precondition", "No hay suficientes equipos.");
+      // CAMBIO AQUÍ: Usa HttpsError directamente
+      throw new HttpsError("failed-precondition", "No hay suficientes equipos.");
     }
+
     const [primerLugar, segundoLugar, tercerLugar, cuartoLugar] = equiposOrdenados.map((e) => e.nombre);
+    
     const updates = {};
     updates["semifinales/0/equipo1"] = primerLugar;
     updates["semifinales/0/equipo2"] = cuartoLugar;
     updates["semifinales/1/equipo1"] = segundoLugar;
     updates["semifinales/1/equipo2"] = tercerLugar;
+
     await calendarioRef.update(updates);
+
     return {status: "success", message: "Fases finales generadas.", enfrentamientos: [`${primerLugar} vs ${cuartoLugar}`, `${segundoLugar} vs ${tercerLugar}`]};
+  
   } catch (error) {
     functions.logger.error("Error al generar fases finales:", error);
-    throw new functions.https.HttpsError("internal", "Ocurrió un error en el servidor.", error.message);
+    // Asegúrate de que si el error es uno que ya creaste, lo vuelvas a lanzar.
+    if (error instanceof HttpsError) {
+        throw error;
+    }
+    // CAMBIO AQUÍ: Usa HttpsError directamente para errores internos
+    throw new HttpsError("internal", "Ocurrió un error en el servidor.", error.message);
   }
 });
