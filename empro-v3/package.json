@@ -12,10 +12,12 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@headlessui/react": "^2.2.4",
     "@mui/material": "^7.1.0",
     "@vitejs/plugin-react": "^4.4.1",
     "firebase": "^11.7.3",
     "framer-motion": "^12.12.1",
+    "lucide-react": "^0.523.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-easy-crop": "^5.4.1",

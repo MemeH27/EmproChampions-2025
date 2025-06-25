@@ -3,12 +3,12 @@ import React from 'react';
 // --- CORRECCIÓN ---
 // Ahora recibe 'plantillas' como prop, en lugar del antiguo 'equiposInfo'
 export default function PartidoCard({ partido, asignaciones, plantillas }) {
-  const nombreEquipo1 = asignaciones[partido.equipo1] || partido.equipo1;
-  const nombreEquipo2 = asignaciones[partido.equipo2] || partido.equipo2;
-  
-  // Se busca la plantilla del equipo usando el prop correcto
-  const plantillaEquipo1 = plantillas[nombreEquipo1] || {};
-  const plantillaEquipo2 = plantillas[nombreEquipo2] || {};
+  const nombreEquipo1 = (asignaciones && partido.equipo1 && asignaciones[partido.equipo1]) || partido.equipo1;
+  const nombreEquipo2 = (asignaciones && partido.equipo2 && asignaciones[partido.equipo2]) || partido.equipo2;
+
+  const plantillaEquipo1 = (plantillas && plantillas[nombreEquipo1]) || {};
+  const plantillaEquipo2 = (plantillas && plantillas[nombreEquipo2]) || {};
+
 
   const logo1Src = plantillaEquipo1.logo ? `${import.meta.env.BASE_URL}img/escudos/${plantillaEquipo1.logo}` : `${import.meta.env.BASE_URL}img/logo-empro.png`;
   const logo2Src = plantillaEquipo2.logo ? `${import.meta.env.BASE_URL}img/escudos/${plantillaEquipo2.logo}` : `${import.meta.env.BASE_URL}img/logo-empro.png`;
