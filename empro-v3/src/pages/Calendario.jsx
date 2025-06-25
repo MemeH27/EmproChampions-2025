@@ -1,4 +1,3 @@
-// ... (tus imports sin cambios)
 import { useEffect, useState } from 'react';
 import { ref, onValue, off, set } from 'firebase/database';
 import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/functions';
@@ -6,6 +5,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import ModalAsignacion from '../components/ModalAsignacion';
 import PartidoCard from '../components/PartidoCard';
+import ModalSeleccionFinal from '../components/ModalSeleccionFinal';
 import { initialData } from '../data/initialData';
 import { db } from '../firebase';
 import { useAuth } from '../context/AuthContext';
@@ -23,8 +23,7 @@ export default function Calendario() {
   const [liveData, setLiveData] = useState({ calendario: null, equiposInfo: {} });
   const [modalOpen, setModalOpen] = useState(false);
   const [modalData, setModalData] = useState({ letra: '', asignacionActual: '' });
-  const [isLoadingFases, setIsLoadingFases] = useState(false);
-  const [isLoadingFinal, setIsLoadingFinal] = useState(false);
+  const [modalFinalOpen, setModalFinalOpen] = useState(false);
   const [hasUploadedInitialData, setHasUploadedInitialData] = useState(false);
 
   useEffect(() => {
@@ -68,43 +67,38 @@ export default function Calendario() {
     setModalOpen(true);
   };
 
-  const handleGenerarSemis = async () => {
-    if (!window.confirm(`¿Estás seguro de generar las semifinales para ${generoActivo}?`)) return;
-    setIsLoadingFases(true);
-    try {
-      const functions = getFunctions();
-      if (import.meta.env.DEV) connectFunctionsEmulator(functions, "localhost", 5001);
-      const generarFasesFinales = httpsCallable(functions, 'generarFasesFinales');
-      const result = await generarFasesFinales({ genero: generoActivo });
-      alert(`¡Éxito!\n${result.data.enfrentamientos.join('\n')}`);
-    } catch (error) {
-      console.error("Error:", error);
-      alert(`Error al generar semifinales: ${error.message}`);
-    } finally {
-      setIsLoadingFases(false);
-    }
+  const handleGuardarFinal = async ({ granFinal, tercerLugar }) => {
+    const finalesRef = ref(db, `calendario/${generoActivo}/partidos/partidos/finales`);
+    await set(finalesRef, [
+      {
+        cancha: "2",
+        equipo1: tercerLugar[0],
+        equipo2: tercerLugar[1],
+        fecha: "Domingo 29 Jun - 04:00 PM",
+        nombre: "Tercer Lugar"
+      },
+      {
+        cancha: "1",
+        equipo1: granFinal[0],
+        equipo2: granFinal[1],
+        fecha: "Domingo 29 Jun - 05:00 PM",
+        nombre: "Gran Final"
+      }
+    ]);
+    alert("Final guardada con éxito");
   };
 
-  const handleGenerarFinal = async () => {
-    if (!window.confirm(`¿Deseás generar la final para ${generoActivo}?`)) return;
-    setIsLoadingFinal(true);
-    try {
-      const functions = getFunctions();
-      if (import.meta.env.DEV) connectFunctionsEmulator(functions, "localhost", 5001);
-      const generarFinal = httpsCallable(functions, 'generarFinal');
-      const result = await generarFinal({ genero: generoActivo });
-      alert(`¡Final generada!\n${result.data.enfrentamiento}`);
-    } catch (error) {
-      console.error("Error:", error);
-      alert(`Error al generar final: ${error.message}`);
-    } finally {
-      setIsLoadingFinal(false);
-    }
-  };
-
-  const calendario = liveData.calendario || {};
+  const calendario = liveData.calendario?.partidos || {};
   const plantillas = initialData.plantillas[generoActivo] || {};
   const equiposInfo = liveData.equiposInfo || {};
+  const asignaciones = calendario.asignaciones || {};
+
+  const equiposSemis = [...new Set(
+    (calendario.partidos?.semifinales || [])
+      .flatMap(p => [p.equipo1, p.equipo2])
+      .map((e) => asignaciones[e] || e)
+      .filter((nombre) => nombre && !nombre.toLowerCase().includes('lugar') && nombre !== 'undefined')
+  )];
 
   return (
     <div className="w-full min-h-screen bg-main-background text-white font-qatar flex flex-col">
@@ -112,32 +106,45 @@ export default function Calendario() {
       <div className="container mx-auto px-4 py-8 flex-grow">
         <h1 className="text-4xl md:text-5xl font-bold text-center text-yellow-400 drop-shadow-lg mb-6">Calendario de Partidos</h1>
 
-        {!calendario ? <p className="text-center">Cargando...</p> : (
+        <div className="flex justify-center mb-8 bg-black/30 rounded-full p-1 max-w-sm mx-auto">
+          <button onClick={() => setGeneroActivo("masculino")} className={`w-1/2 py-2 rounded-full font-bold transition-colors ${generoActivo === 'masculino' ? 'bg-yellow-400 text-black' : 'hover:bg-white/10'}`}>
+            Masculino
+          </button>
+          <button onClick={() => setGeneroActivo("femenino")} className={`w-1/2 py-2 rounded-full font-bold transition-colors ${generoActivo === 'femenino' ? 'bg-yellow-400 text-black' : 'hover:bg-white/10'}`}>
+            Femenino
+          </button>
+        </div>
+
+        {/* Tarjetas de asignaciones */}
+        <div className="flex flex-wrap justify-center gap-4 mb-8">
+          {Object.entries(asignaciones).map(([letra, equipo]) => (
+            <div key={letra} className="bg-white text-black px-4 py-2 rounded-xl shadow-md font-bold flex items-center gap-2">
+              <span className="text-red-600">{letra}:</span>
+              <span>{equipo || `Equipo ${letra}`}</span>
+              {(rol === 'admin' || rol === 'superadmin') && (
+                <button onClick={() => handleEditClick(letra, equipo)} className="text-blue-600 hover:underline text-sm">Editar</button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {!calendario.partidos ? (
+          <p className="text-center">Cargando...</p>
+        ) : (
           <div className="max-w-4xl mx-auto">
             <div className="space-y-8">
-              {calendario.partidos?.partidos && Object.entries(calendario.partidos.partidos).map(([key, jornada]) => (
+              {Object.entries(calendario.partidos).map(([key, jornada]) => (
                 <div key={key}>
                   <div className="flex justify-between items-center mb-4 border-b-2 border-yellow-400/20 pb-2">
                     <h2 className="text-2xl font-bold text-yellow-300">{formatGroupName(key)}</h2>
 
-                    {(rol === 'admin' || rol === 'superadmin') && (
-                      key === 'semifinales' ? (
-                        <button
-                          onClick={handleGenerarSemis}
-                          disabled={isLoadingFases}
-                          className="bg-green-600 text-white font-bold px-3 py-1 rounded-lg text-sm hover:bg-green-500 disabled:bg-gray-500 disabled:cursor-not-allowed"
-                        >
-                          {isLoadingFases ? 'Generando...' : 'Generar Semis'}
-                        </button>
-                      ) : key === 'finales' ? (
-                        <button
-                          onClick={handleGenerarFinal}
-                          disabled={isLoadingFinal}
-                          className="bg-red-600 text-white font-bold px-3 py-1 rounded-lg text-sm hover:bg-red-500 disabled:bg-gray-500 disabled:cursor-not-allowed"
-                        >
-                          {isLoadingFinal ? 'Generando...' : 'Generar Final'}
-                        </button>
-                      ) : null
+                    {rol === 'admin' && key === 'finales' && (
+                      <button
+                        onClick={() => setModalFinalOpen(true)}
+                        className="bg-red-600 text-white font-bold px-3 py-1 rounded-lg text-sm hover:bg-red-500"
+                      >
+                        Seleccionar Finalistas
+                      </button>
                     )}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -146,8 +153,9 @@ export default function Calendario() {
                         <PartidoCard
                           key={i}
                           partido={partido}
-                          asignaciones={calendario.partidos.asignaciones}
+                          asignaciones={asignaciones}
                           plantillas={plantillas}
+                          equiposInfo={equiposInfo}
                         />
                       ))
                     ) : (
@@ -161,14 +169,19 @@ export default function Calendario() {
         )}
       </div>
       <Footer />
+
       <ModalAsignacion
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         letra={modalData.letra}
         genero={generoActivo}
         asignacionActual={modalData.asignacionActual}
-        todasLasAsignaciones={calendario.partidos?.asignaciones}
+        todasLasAsignaciones={asignaciones}
+        equiposYaAsignados={asignaciones}
       />
+
+      <ModalSeleccionFinal open={modalFinalOpen} onClose={() => setModalFinalOpen(false)} genero={generoActivo} />
+        
     </div>
   );
 }
