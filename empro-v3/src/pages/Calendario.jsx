@@ -25,6 +25,7 @@ export default function Calendario() {
   const [modalData, setModalData] = useState({ letra: '', asignacionActual: '' });
   const [modalFinalOpen, setModalFinalOpen] = useState(false);
   const [hasUploadedInitialData, setHasUploadedInitialData] = useState(false);
+  const [modalAbierto, setModalAbierto] = useState(false);
 
   useEffect(() => {
     const calendarioRef = ref(db, `calendario/${generoActivo}`);
@@ -65,26 +66,20 @@ export default function Calendario() {
     setModalOpen(true);
   };
 
-  const handleGuardarFinal = async ({ granFinal, tercerLugar }) => {
-    const finalesRef = ref(db, `calendario/${generoActivo}/partidos/finales`);
-    await set(finalesRef, [
-      {
-        cancha: "2",
-        equipo1: tercerLugar[0],
-        equipo2: tercerLugar[1],
-        fecha: "Domingo 29 Jun - 04:00 PM",
-        nombre: "Tercer Lugar"
-      },
-      {
-        cancha: "1",
-        equipo1: granFinal[0],
-        equipo2: granFinal[1],
-        fecha: "Domingo 29 Jun - 05:00 PM",
-        nombre: "Gran Final"
-      }
-    ]);
-    alert("Final guardada con éxito");
+  const handleGuardarFinalistas = ({ granFinal, tercerLugar }) => {
+    const finalesRef = ref(db, `calendario/masculino/partidos/finales`);
+    set(finalesRef, {
+      granFinal,
+      tercerLugar
+    }).then(() => {
+      alert("Finalistas guardados correctamente");
+      setModalAbierto(false);
+    }).catch((error) => {
+      console.error("Error al guardar:", error);
+      alert("Error al guardar finalistas");
+    });
   };
+
 
   const calendario = liveData.calendario || {};
   const asignaciones = calendario.asignaciones || {};
@@ -217,7 +212,14 @@ export default function Calendario() {
         equiposYaAsignados={asignaciones}
       />
 
-      <ModalSeleccionFinal open={modalFinalOpen} onClose={() => setModalFinalOpen(false)} genero={generoActivo} />
+      <ModalSeleccionFinal
+        open={modalFinalOpen}
+        onClose={() => setModalAbierto(false)}
+        genero="masculino"
+        onGuardar={handleGuardarFinalistas}
+      />
+
+
     </div>
   );
 }

@@ -31,7 +31,8 @@ export default function ModalAsignacion({
     }
 
     try {
-      const asignacionesRef = ref(db, `calendario/${genero}/partidos/asignaciones`);
+      // CORREGIDO: ahora guarda en el nodo correcto
+      const asignacionesRef = ref(db, `calendario/${genero}/asignaciones`);
       await update(asignacionesRef, {
         [letra]: equipoSeleccionado
       });
@@ -41,7 +42,6 @@ export default function ModalAsignacion({
       alert("Hubo un problema al guardar. Intentalo de nuevo.");
     }
   };
-
   const equiposDisponiblesFiltrados = nombresEquipos.filter(
     (e) => e === asignacionActual || !Object.values(equiposYaAsignados).includes(e)
   );

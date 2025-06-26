@@ -1,102 +1,101 @@
 import { useEffect, useState } from 'react';
 import { Dialog } from '@headlessui/react';
-import { X } from 'lucide-react';
+import { ref, onValue } from 'firebase/database';
 import { db } from '../firebase';
-import { ref, get, update } from 'firebase/database';
 
-export default function ModalSeleccionFinal({ open, onClose, genero }) {
-  const [equiposSemis, setEquiposSemis] = useState([]);
-  const [final1, setFinal1] = useState('');
-  const [final2, setFinal2] = useState('');
-  const [tercer1, setTercer1] = useState('');
-  const [tercer2, setTercer2] = useState('');
+export default function ModalSeleccionFinal({ open, onClose, genero, onGuardar = () => {} }) {
+  const [equiposTop4, setEquiposTop4] = useState([]);
+  const [granFinal, setGranFinal] = useState({ equipo1: '', equipo2: '' });
+  const [tercerLugar, setTercerLugar] = useState({ equipo1: '', equipo2: '' });
 
+  // Obtener los 4 primeros lugares
   useEffect(() => {
-    if (!genero) return;
+    const tablaRef = ref(db, `tablas/${genero}`);
+    const unsubscribe = onValue(tablaRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const datos = snapshot.val();
+        const lista = Object.entries(datos).map(([nombre, data]) => ({
+          nombre,
+          puntos: data.puntos ?? 0,
+          logo: data.logo ?? '',
+        }));
 
-    const fetchSemis = async () => {
-      try {
-        const semisRef = ref(db, `calendario/${genero}/partidos/semifinales`);
-        const snapshot = await get(semisRef);
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          const equipos = Object.values(data)
-            .flatMap(partido => [partido.equipo1, partido.equipo2])
-            .filter(Boolean);
-          setEquiposSemis(equipos);
-        } else {
-          setEquiposSemis([]);
-        }
-      } catch (err) {
-        console.error("Error cargando semifinalistas:", err);
-        setEquiposSemis([]);
+        const top4 = lista
+          .sort((a, b) => b.puntos - a.puntos)
+          .slice(0, 4);
+
+        setEquiposTop4(top4);
       }
-    };
+    });
 
-    fetchSemis();
+    return () => unsubscribe();
   }, [genero]);
 
-  const handleGuardar = async () => {
-    if (!final1 || !final2 || !tercer1 || !tercer2) {
-      alert("Seleccioná los 4 equipos.");
+  // Evitar equipos duplicados
+  const equiposSeleccionados = new Set([
+    granFinal.equipo1,
+    granFinal.equipo2,
+    tercerLugar.equipo1,
+    tercerLugar.equipo2
+  ]);
+
+  const equiposFiltrados = (actual) =>
+    equiposTop4.filter((e) => e.nombre === actual || !equiposSeleccionados.has(e.nombre));
+
+  const renderSelect = (label, valor, onChange) => (
+    <div className="mb-2">
+      <label className="block font-medium mb-1">{label}:</label>
+      <select
+        value={valor}
+        onChange={onChange}
+        className="w-full border border-gray-300 rounded px-3 py-2"
+      >
+        <option value="">Seleccionar equipo</option>
+        {equiposFiltrados(valor).map((e) => (
+          <option key={e.nombre} value={e.nombre}>
+            {e.nombre}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
+  const handleGuardar = () => {
+    if (
+      !granFinal.equipo1 ||
+      !granFinal.equipo2 ||
+      !tercerLugar.equipo1 ||
+      !tercerLugar.equipo2
+    ) {
+      alert('Seleccioná todos los equipos');
       return;
     }
 
-    try {
-      const finalesRef = ref(db, `calendario/${genero}/finales`);
-      await update(finalesRef, {
-        final1: { equipo1: final1, equipo2: final2 },
-        tercerLugar: { equipo1: tercer1, equipo2: tercer2 }
-      });
-      alert("Finales guardadas con éxito.");
-      onClose();
-    } catch (error) {
-      console.error("Error al guardar finales:", error);
-      alert("Error al guardar.");
-    }
+    onGuardar({
+      granFinal: [granFinal.equipo1, granFinal.equipo2],
+      tercerLugar: [tercerLugar.equipo1, tercerLugar.equipo2],
+    });
+    onClose();
   };
 
   return (
-    <Dialog open={open} onClose={onClose} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <Dialog.Panel className="bg-white text-black rounded-2xl p-6 w-full max-w-md shadow-xl relative">
-        <button
-          onClick={onClose}
-          className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
-        >
-          <X size={20} />
-        </button>
+    <Dialog open={open} onClose={onClose} className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
+      <Dialog.Panel className="bg-white text-black p-6 rounded-lg w-full max-w-md">
+        <h2 className="text-xl font-bold mb-4">Seleccionar Finalistas</h2>
 
-        <Dialog.Title className="text-xl font-semibold text-center mb-4">Seleccionar Finalistas</Dialog.Title>
+        {renderSelect("Gran Final - Equipo 1", granFinal.equipo1, (e) => setGranFinal(p => ({ ...p, equipo1: e.target.value })))}
+        {renderSelect("Gran Final - Equipo 2", granFinal.equipo2, (e) => setGranFinal(p => ({ ...p, equipo2: e.target.value })))}
 
-        <div className="mb-4">
-          <label className="block font-bold mb-1">Gran Final:</label>
-          <select value={final1} onChange={e => setFinal1(e.target.value)} className="w-full border px-3 py-2 rounded mb-2">
-            <option value="">Seleccionar equipo</option>
-            {equiposSemis.map(e => <option key={e} value={e}>{e}</option>)}
-          </select>
-          <select value={final2} onChange={e => setFinal2(e.target.value)} className="w-full border px-3 py-2 rounded">
-            <option value="">Seleccionar equipo</option>
-            {equiposSemis.map(e => <option key={e} value={e}>{e}</option>)}
-          </select>
-        </div>
+        <hr className="my-4" />
 
-        <div className="mb-4">
-          <label className="block font-bold mb-1">Tercer Lugar:</label>
-          <select value={tercer1} onChange={e => setTercer1(e.target.value)} className="w-full border px-3 py-2 rounded mb-2">
-            <option value="">Seleccionar equipo</option>
-            {equiposSemis.map(e => <option key={e} value={e}>{e}</option>)}
-          </select>
-          <select value={tercer2} onChange={e => setTercer2(e.target.value)} className="w-full border px-3 py-2 rounded">
-            <option value="">Seleccionar equipo</option>
-            {equiposSemis.map(e => <option key={e} value={e}>{e}</option>)}
-          </select>
-        </div>
+        {renderSelect("Tercer Lugar - Equipo 1", tercerLugar.equipo1, (e) => setTercerLugar(p => ({ ...p, equipo1: e.target.value })))}
+        {renderSelect("Tercer Lugar - Equipo 2", tercerLugar.equipo2, (e) => setTercerLugar(p => ({ ...p, equipo2: e.target.value })))}
 
         <button
           onClick={handleGuardar}
-          className="w-full bg-red-600 text-white font-bold py-2 rounded hover:bg-red-500"
+          className="mt-4 w-full bg-yellow-400 text-black font-bold py-2 rounded hover:bg-yellow-300"
         >
-          Guardar Final
+          Guardar
         </button>
       </Dialog.Panel>
     </Dialog>
